@@ -141,6 +141,7 @@ ifeq ($(CONFIG_DEMO_EXAMPLE),y)
 
     libiui_example_files-y := tests/example.c
     libiui_example_files-$(CONFIG_DEMO_PIXELWALL) += tests/pixelwall-demo.c
+    libiui_example_files-$(CONFIG_DEMO_FORTHSALON) += tests/forthsalon-demo.c
     libiui_example_includes-y := include ports externals tests
     libiui_example_depends-y := libiui.a $(NYANCAT_DATA)
     libiui_example_ldflags-y := libiui.a $(TARGET_LIBS)
