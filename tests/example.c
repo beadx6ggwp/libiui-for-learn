@@ -8,16 +8,16 @@
  * Run: ./libiui_example
  *
  * Features demonstrated:
- *   - Calculator with keyboard support
- *   - Analog clock with smooth second hand
- *   - Vector primitives (gauges, charts, progress rings)
- *   - Nyan Cat animation (RLE-compressed frames)
- *   - MD3 color scheme display
- *   - UI components (buttons, chips, sliders, progress)
- *   - Motion system (easing curves)
- *   - Accessibility (WCAG contrast, screen reader hints)
- *   - TextField variants
- *   - Menus, dialogs, date/time pickers, snackbar
+ * - Calculator with keyboard support
+ * - Analog clock with smooth second hand
+ * - Vector primitives (gauges, charts, progress rings)
+ * - Nyan Cat animation (RLE-compressed frames)
+ * - MD3 color scheme display
+ * - UI components (buttons, chips, sliders, progress)
+ * - Motion system (easing curves)
+ * - Accessibility (WCAG contrast, screen reader hints)
+ * - TextField variants
+ * - Menus, dialogs, date/time pickers, snackbar
  */
 
 #include <math.h>
@@ -116,31 +116,19 @@ static uint8_t nyancat_all_frames[NYANCAT_TOTAL_FRAMES][4096];
 static bool nyancat_frames_initialized = false;
 #endif /* CONFIG_DEMO_NYANCAT */
 
-#ifdef CONFIG_DEMO_CALCULATOR
-/* Forward declarations */
-static void calc_init(calculator_state_t *calc);
-static void calc_input_digit(calculator_state_t *calc, char digit);
-static void calc_input_decimal(calculator_state_t *calc);
-static void calc_negate(calculator_state_t *calc);
-static void calc_clear(calculator_state_t *calc);
-static void calc_clear_all(calculator_state_t *calc);
-static void calc_operation(calculator_state_t *calc, char op);
-static void calc_equals(calculator_state_t *calc);
-#endif /* CONFIG_DEMO_CALCULATOR */
-
 /* Standard demo window position: 10dp gap right of libIUI Demo (x=30+340=370).
  * y=30 keeps all windows top-aligned with the control panel.
- * These are used by all demo windows, not just calculator. */
+ * These are used by all demo windows, not just calculator.
+ */
 #define DEMO_WIN_X 380
 #define DEMO_WIN_Y 30
 
 /* Forward declaration so all draw functions can call get_demo_window_height()
- * without knowing the full implementation, which lives after the constants. */
+ * without knowing the full implementation, which lives after the constants.
+ */
 static float get_demo_window_height(void);
 
-#ifdef CONFIG_DEMO_CALCULATOR
-/* Calculator Implementation */
-
+#ifdef CONFIG_DEMO_CALCULATOR /* Calculator Implementation */
 static void calc_init(calculator_state_t *calc)
 {
     memset(calc, 0, sizeof(*calc));
@@ -321,9 +309,7 @@ static void draw_calculator_window(iui_context *ui, calculator_state_t *calc)
 }
 #endif /* CONFIG_DEMO_CALCULATOR */
 
-#ifdef CONFIG_DEMO_CLOCK
-/* Analog Clock Implementation */
-
+#ifdef CONFIG_DEMO_CLOCK /* Analog Clock Implementation */
 static void draw_clock_window(iui_context *ui, iui_port_ctx *port)
 {
     iui_begin_window(ui, "Analog Clock", DEMO_WIN_X, DEMO_WIN_Y, 320,
@@ -387,9 +373,7 @@ static void draw_clock_window(iui_context *ui, iui_port_ctx *port)
 }
 #endif /* CONFIG_DEMO_CLOCK */
 
-#ifdef CONFIG_DEMO_VECTOR
-/* Vector Primitives Demo */
-
+#ifdef CONFIG_DEMO_VECTOR /* Vector Primitives Demo */
 static void draw_vector_demo_window(iui_context *ui, float progress_value)
 {
     iui_begin_window(ui, "Vector Primitives", DEMO_WIN_X, DEMO_WIN_Y, 390,
@@ -561,9 +545,7 @@ static void draw_vector_demo_window(iui_context *ui, float progress_value)
 }
 #endif /* CONFIG_DEMO_VECTOR */
 
-#ifdef CONFIG_DEMO_NYANCAT
-/* Nyancat Animation */
-
+#ifdef CONFIG_DEMO_NYANCAT /* Nyancat Animation */
 static void decompress_baseline_frame(const uint8_t *opcodes,
                                       const uint8_t *data_end,
                                       uint8_t *output)
@@ -721,9 +703,7 @@ static void draw_nyancat_window(iui_context *ui, iui_port_ctx *port)
 }
 #endif /* CONFIG_DEMO_NYANCAT */
 
-/* Color Scheme Demo */
-
-#ifdef CONFIG_DEMO_THEME
+#ifdef CONFIG_DEMO_THEME /* Color Scheme Demo */
 static void draw_color_scheme_window(iui_context *ui, iui_port_ctx *port)
 {
     iui_begin_window(ui, "Color Scheme", DEMO_WIN_X, DEMO_WIN_Y, 300,
@@ -1263,9 +1243,7 @@ static void draw_iui_components_window(iui_context *ui, float delta_time)
 }
 #endif /* CONFIG_MODULE_BASIC && MODULE_INPUT && MODULE_CONTAINER */
 
-/* Accessibility Demo */
-
-#ifdef CONFIG_DEMO_ACCESSIBILITY
+#ifdef CONFIG_DEMO_ACCESSIBILITY /* Accessibility Demo */
 static void draw_accessibility_window(iui_context *ui)
 {
     iui_begin_window(ui, "Accessibility", DEMO_WIN_X, DEMO_WIN_Y, 340,
@@ -1353,13 +1331,7 @@ static void draw_accessibility_window(iui_context *ui)
 }
 #endif /* CONFIG_DEMO_ACCESSIBILITY */
 
-#ifdef CONFIG_DEMO_FONT_EDITOR
-
-/* Font Editor: interactive vector glyph editor with canvas, control points,
- * mouse selection, keyboard movement, and undo. Mimics
- * externals/mado/tools/font-edit but uses zero heap allocations.
- */
-
+#ifdef CONFIG_DEMO_FONT_EDITOR /* Interactive vector glyph editor */
 #define FE_MAX_OPS 64
 #define FE_MAX_POINTS 192
 #define FE_UNDO_DEPTH 8
@@ -2042,9 +2014,7 @@ static void draw_font_editor_window(iui_context *ui)
 }
 #endif /* CONFIG_DEMO_FONT_EDITOR */
 
-/* Motion System Demo */
-
-#ifdef CONFIG_DEMO_MOTION
+#ifdef CONFIG_DEMO_MOTION /* Motion System Demo */
 static void draw_motion_window(iui_context *ui, float delta_time)
 {
     iui_begin_window(ui, "Motion", DEMO_WIN_X, DEMO_WIN_Y, 360,
@@ -2153,9 +2123,7 @@ static void draw_motion_window(iui_context *ui, float delta_time)
 }
 #endif /* CONFIG_DEMO_MOTION */
 
-#ifdef CONFIG_MODULE_INPUT
-/* TextField Demo */
-
+#ifdef CONFIG_MODULE_INPUT /* TextField Demo */
 static void draw_textfield_window(iui_context *ui)
 {
     static char basic_text[64] = "";
@@ -2286,9 +2254,7 @@ static void draw_textfield_window(iui_context *ui)
 }
 #endif /* CONFIG_MODULE_INPUT - TextField demo */
 
-#ifdef CONFIG_MODULE_NAVIGATION
-/* Top App Bar Demo */
-
+#ifdef CONFIG_MODULE_NAVIGATION /* Top App Bar Demo */
 static void draw_appbar_demo_window(iui_context *ui)
 {
     iui_begin_window(ui, "Top App Bar", DEMO_WIN_X, DEMO_WIN_Y, 420,
@@ -2399,9 +2365,7 @@ static void draw_appbar_demo_window(iui_context *ui)
 }
 #endif /* CONFIG_MODULE_NAVIGATION */
 
-#ifdef CONFIG_MODULE_LIST
-/* List Component Demo */
-
+#ifdef CONFIG_MODULE_LIST /* List Component Demo */
 static void draw_list_demo_window(iui_context *ui)
 {
     iui_begin_window(ui, "Lists Demo", DEMO_WIN_X, DEMO_WIN_Y, 380,
@@ -2554,9 +2518,7 @@ static void draw_list_demo_window(iui_context *ui)
 }
 #endif /* CONFIG_MODULE_LIST */
 
-#ifdef CONFIG_MODULE_NAVIGATION
-/* Navigation Components Demo */
-
+#ifdef CONFIG_MODULE_NAVIGATION /* Navigation Components Demo */
 static void draw_navigation_demo_window(iui_context *ui)
 {
     iui_begin_window(ui, "Navigation Demo", DEMO_WIN_X, DEMO_WIN_Y, 410,
@@ -2600,7 +2562,8 @@ static void draw_navigation_demo_window(iui_context *ui)
          *   avail_rows = floor((avail - 8) / row_h)
          *   rail_height = (avail_rows - 2) * row_h - 8
          * the cursor after skip_rows equals (avail_rows-2)*row_h, leaving
-         * at least 2*row_h + remainder between cursor and clip_bottom. */
+         * at least 2*row_h + remainder between cursor and clip_bottom.
+         */
         iui_rect_t layout = iui_get_layout_rect(ui);
         float rail_x = layout.x;
         float rail_y = layout.y + 8.f;
@@ -2612,9 +2575,8 @@ static void draw_navigation_demo_window(iui_context *ui)
         iui_nav_rail_begin(ui, &rail_state, rail_x, rail_y, rail_height);
 
         /* FAB at top */
-        if (iui_nav_rail_fab(ui, &rail_state, "edit")) {
+        if (iui_nav_rail_fab(ui, &rail_state, "edit"))
             printf("Rail FAB clicked\n");
-        }
 
         /* Navigation items */
         if (iui_nav_rail_item(ui, &rail_state, "home", "Home", 0))
@@ -2630,13 +2592,17 @@ static void draw_navigation_demo_window(iui_context *ui)
 
         /* Advance layout cursor past the rail.
          * rail_y starts 8dp below layout.y, so total vertical span from
-         * layout.y is (8 + rail_height).  Use ceilf to avoid landing
-         * inside the rail's last row. */
-        /* Subtract a small epsilon before ceiling to prevent FP rounding
-         * (e.g. 8.f + (N*row_h - 8.f) may compute as N*row_h + epsilon)
-         * from silently adding an extra row.  Scale with row_h: at large
-         * values (row_h~100, N~1000) the ULP at N*row_h is ~0.008f, so a
-         * fixed 0.01f would be unreliable; 1e-4*row_h stays below 1 ULP. */
+         * layout.y is (8 + rail_height).  Use ceilf to avoid landing inside
+         * the rail's last row.
+         *
+         * Subtract a small epsilon before ceiling to prevent FP rounding (e.g.
+         * 8.f + (N*row_h - 8.f) may compute as N*row_h + epsilon) from silently
+         * adding an extra row.
+         *
+         * Scale with row_h: at large values (row_h~100, N~1000) the ULP at
+         * N*row_h is ~0.008f, so a fixed 0.01f would be unreliable; 1e-4*row_h
+         * stays below 1 ULP.
+         */
         float eps = fmaxf(0.01f, row_h * 1e-4f);
         int skip_rows = (int) ceilf((8.f + rail_height - eps) / row_h);
         for (int i = 0; i < skip_rows; i++)
@@ -2751,8 +2717,6 @@ static void draw_navigation_demo_window(iui_context *ui)
  *
  * These constants mirror libiui's internal layout metrics.
  */
-/* Derived from : font_height = 21, row_height = font_height * 1.5,
-                padding = 8 */
 
 #define DEMO_FONT_HEIGHT 21.f
 #define DEMO_ROW_HEIGHT (DEMO_FONT_HEIGHT * 1.5f) /* 31.5 */
@@ -2779,7 +2743,8 @@ static void draw_navigation_demo_window(iui_context *ui)
 /* Count enabled demo toggles at runtime.
  * Must mirror the toggle grid in example_frame exactly.
  * The entire grid is gated on CONFIG_MODULE_INPUT; entries within follow
- * the same preprocessor conditions as their iui_switch() calls. */
+ * the same preprocessor conditions as their iui_switch() calls.
+ */
 static int get_demo_toggle_count(void)
 {
     int count = 0;
@@ -2877,9 +2842,11 @@ static float get_demo_window_height(void)
 }
 
 /* Main loop state structure.
- * For Emscripten builds, emscripten_set_main_loop_arg() requires all state
- * to be passed via a void pointer. This struct holds everything that was
- * previously local to main(). */
+ *
+ * For Emscripten builds, emscripten_set_main_loop_arg() requires all state to
+ * be passed via a void pointer. This struct holds everything that was
+ * previously local to main().
+ */
 
 typedef struct {
     /* Core handles */
@@ -3050,8 +3017,8 @@ static void demo_close_other_windows(demo_state_t *state, bool *keep_open)
 
 /* Frame callback.
  * Processes a single frame. Called from native while loop in main()
- * or from emscripten_set_main_loop_arg(). */
-
+ * or from emscripten_set_main_loop_arg().
+ */
 static void example_frame(void *arg)
 {
     demo_state_t *state = (demo_state_t *) arg;
@@ -3693,7 +3660,8 @@ int main(int argc, char *argv[])
 #ifdef __EMSCRIPTEN__
     /* For Emscripten, use the browser's animation frame callback.
      * 0 = use requestAnimationFrame (best for browsers)
-     * 1 = simulate infinite loop (required for ASYNCIFY) */
+     * 1 = simulate infinite loop (required for ASYNCIFY)
+     */
     emscripten_set_main_loop_arg(example_frame, &state, 0, 1);
 #else
     /* Native main loop */
