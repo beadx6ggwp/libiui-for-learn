@@ -359,6 +359,15 @@ config DEMO_PIXELWALL
       Includes Snake, Pong, Tetris, Invaders, and Pacman March.
       Uses a segmented button to switch between designs.
 
+config DEMO_FORTHSALON
+    bool "Forth Salon Pixel Shader"
+    default y
+    depends on DEMO_EXAMPLE && MODULE_NAVIGATION
+    help
+      Forth Salon pixel shader demo.  A bytecode Forth interpreter
+      runs a program per-pixel to generate animated visuals.
+      Built-in examples from boomlinde/sf (twister, rainbow, etc.).
+
 endmenu
 
 # Build Options

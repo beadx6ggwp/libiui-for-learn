@@ -46,6 +46,10 @@
 #include "pixelwall-demo.h"
 #endif
 
+#ifdef CONFIG_DEMO_FORTHSALON
+#include "forthsalon-demo.h"
+#endif
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -2930,6 +2934,10 @@ typedef struct {
     pixelwall_state_t pixelwall;
     bool show_pixelwall;
 #endif
+#ifdef CONFIG_DEMO_FORTHSALON
+    forthsalon_state_t forthsalon;
+    bool show_forthsalon;
+#endif
 #ifdef CONFIG_FEATURE_THEME
     bool dark_mode;
 #endif
@@ -3032,6 +3040,10 @@ static void demo_close_other_windows(demo_state_t *state, bool *keep_open)
 #ifdef CONFIG_DEMO_PIXELWALL
     if (&state->show_pixelwall != keep_open)
         state->show_pixelwall = false;
+#endif
+#ifdef CONFIG_DEMO_FORTHSALON
+    if (&state->show_forthsalon != keep_open)
+        state->show_forthsalon = false;
 #endif
 }
 #endif /* CONFIG_MODULE_BASIC */
@@ -3216,6 +3228,12 @@ static void example_frame(void *arg)
         demo_close_other_windows(state, &state->show_pixelwall);
     iui_grid_next(ui);
 #endif
+#ifdef CONFIG_DEMO_FORTHSALON
+    if (iui_switch(ui, "Forth Salon", &state->show_forthsalon, NULL, NULL) &&
+        state->show_forthsalon)
+        demo_close_other_windows(state, &state->show_forthsalon);
+    iui_grid_next(ui);
+#endif
 #ifdef CONFIG_FEATURE_THEME
     if (iui_switch(ui, "Dark mode", &state->dark_mode, NULL, NULL)) {
         iui_set_theme(ui,
@@ -3317,6 +3335,11 @@ static void example_frame(void *arg)
     if (state->show_pixelwall)
         draw_pixelwall_window(ui, port, &state->pixelwall, delta_time,
                               get_demo_window_height());
+#endif
+#ifdef CONFIG_DEMO_FORTHSALON
+    if (state->show_forthsalon)
+        draw_forthsalon_window(ui, port, &state->forthsalon, delta_time,
+                               get_demo_window_height());
 #endif
 #ifdef CONFIG_MODULE_INPUT
     if (state->show_textfield_demo)
@@ -3638,6 +3661,9 @@ int main(int argc, char *argv[])
 #ifdef CONFIG_DEMO_PIXELWALL
     state.show_pixelwall = DEMO_DEFAULT_VIS;
 #endif
+#ifdef CONFIG_DEMO_FORTHSALON
+    state.show_forthsalon = DEMO_DEFAULT_VIS;
+#endif
 #ifdef CONFIG_FEATURE_THEME
     state.dark_mode = true;
 #endif
@@ -3646,6 +3672,9 @@ int main(int argc, char *argv[])
 #endif
 #ifdef CONFIG_DEMO_PIXELWALL
     pixelwall_init(&state.pixelwall);
+#endif
+#ifdef CONFIG_DEMO_FORTHSALON
+    forthsalon_init(&state.forthsalon);
 #endif
 
 #ifdef CONFIG_FEATURE_THEME
