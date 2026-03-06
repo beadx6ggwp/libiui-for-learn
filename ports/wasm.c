@@ -288,6 +288,15 @@ static bool wasm_poll_events(iui_port_ctx *ctx)
     if (!ctx)
         return false;
 
+    /* Re-establish global context each frame.
+     * After emscripten_set_main_loop_arg() exits main() via throw "unwind"
+     * with -sASYNCIFY, the g_wasm_ctx global (BSS-resident, initialized to
+     * NULL) is lost across the main-loop unwind transition. The ctx passed
+     * through the port function table remains valid (heap-allocated), so we
+     * restore the global here before JS event callbacks reference it.
+     */
+    g_wasm_ctx = ctx;
+
     /* Update delta time */
     double now = emscripten_get_now();
     ctx->delta_time = (float) (now - ctx->last_frame_time) / 1000.f;
