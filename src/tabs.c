@@ -43,8 +43,7 @@ static int iui_tabs_internal(iui_context *ctx,
 
     /* Draw container background (surface color) */
     iui_rect_t container_rect = {tabs_x, tabs_y, container_width, tab_height};
-    ctx->renderer.draw_box(container_rect, 0.f, ctx->colors.surface,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, container_rect, 0.f, ctx->colors.surface);
 
     /* Track component for MD3 validation */
     IUI_MD3_TRACK_TAB(container_rect, 0.f);
@@ -92,8 +91,7 @@ static int iui_tabs_internal(iui_context *ctx,
         if (!is_selected && iui_state_is_interactive(state)) {
             uint32_t layer_color = iui_state_layer(ctx->colors.on_surface,
                                                    iui_state_get_alpha(state));
-            ctx->renderer.draw_box(tab_rect, 0.f, layer_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, tab_rect, 0.f, layer_color);
         }
 
         /* Determine text/icon colors based on selection state */
@@ -155,8 +153,8 @@ static int iui_tabs_internal(iui_context *ctx,
         /* Primary tabs: full-width indicator with rounded corners */
         iui_rect_t indicator_rect = {indicator_x, indicator_y, indicator_width,
                                      indicator_height};
-        ctx->renderer.draw_box(indicator_rect, indicator_height * 0.5f,
-                               ctx->colors.primary, ctx->renderer.user);
+        iui_emit_box(ctx, indicator_rect, indicator_height * 0.5f,
+                     ctx->colors.primary);
     } else {
         /* Secondary tabs: shorter indicator centered under tab */
         float short_indicator_width = indicator_width * 0.6f;
@@ -165,15 +163,14 @@ static int iui_tabs_internal(iui_context *ctx,
         iui_rect_t short_indicator_rect = {short_indicator_x, indicator_y,
                                            short_indicator_width,
                                            indicator_height};
-        ctx->renderer.draw_box(short_indicator_rect, indicator_height * 0.5f,
-                               ctx->colors.primary, ctx->renderer.user);
+        iui_emit_box(ctx, short_indicator_rect, indicator_height * 0.5f,
+                     ctx->colors.primary);
     }
 
     /* Draw bottom divider line (outline_variant color) */
     iui_rect_t divider_rect = {tabs_x, tabs_y + tab_height - 1.f,
                                container_width, 1.f};
-    ctx->renderer.draw_box(divider_rect, 0.f, ctx->colors.outline_variant,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, divider_rect, 0.f, ctx->colors.outline_variant);
 
     /* Advance layout cursor */
     ctx->layout.y += tab_height + ctx->padding;

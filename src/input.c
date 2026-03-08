@@ -45,19 +45,18 @@ static void textfield_draw_background(iui_context *ctx,
                                       const textfield_colors_t *c)
 {
     if (style == IUI_TEXTFIELD_OUTLINED) {
-        ctx->renderer.draw_box(rect, ctx->corner, c->border,
-                               ctx->renderer.user);
-        ctx->renderer.draw_box((iui_rect_t) {rect.x + 1, rect.y + 1,
-                                             rect.width - 2, rect.height - 2},
-                               ctx->corner - 1,
-                               ctx->colors.surface_container_high,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, rect, ctx->corner, c->border);
+        iui_emit_box(ctx,
+                     (iui_rect_t) {rect.x + 1, rect.y + 1, rect.width - 2,
+                                   rect.height - 2},
+                     ctx->corner - 1, ctx->colors.surface_container_high);
     } else {
-        ctx->renderer.draw_box(rect, ctx->corner, c->bg, ctx->renderer.user);
-        ctx->renderer.draw_box(
+        iui_emit_box(ctx, rect, ctx->corner, c->bg);
+        iui_emit_box(
+            ctx,
             (iui_rect_t) {rect.x, rect.y + rect.height - c->indicator_height,
                           rect.width, c->indicator_height},
-            0.f, c->border, ctx->renderer.user);
+            0.f, c->border);
     }
 }
 
@@ -83,8 +82,7 @@ static void textfield_draw_icons(iui_context *ctx,
         /* Trailing icon hover effect */
         if (!opts->disabled && in_rect(&trailing_rect, ctx->mouse_pos)) {
             uint32_t hover = iui_state_layer(icon_color, IUI_STATE_HOVER_ALPHA);
-            ctx->renderer.draw_box(trailing_rect, icon_size * 0.5f, hover,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, trailing_rect, icon_size * 0.5f, hover);
         }
         iui_draw_textfield_icon(ctx, opts->trailing_icon, cx, cy,
                                 icon_size * 0.8f, icon_color);
@@ -257,10 +255,10 @@ iui_textfield_result iui_textfield(iui_context *ctx,
             pos = len;
         float cursor_x = text_x + textfield_get_width_to_pos(
                                       ctx, buffer, pos, opts.password_mode);
-        ctx->renderer.draw_box(
-            (iui_rect_t) {cursor_x, text_y, IUI_TEXTFIELD_CURSOR_WIDTH,
-                          ctx->font_height},
-            0.f, ctx->colors.primary, ctx->renderer.user);
+        iui_emit_box(ctx,
+                     (iui_rect_t) {cursor_x, text_y, IUI_TEXTFIELD_CURSOR_WIDTH,
+                                   ctx->font_height},
+                     0.f, ctx->colors.primary);
     }
 
     iui_newline(ctx);
@@ -810,10 +808,11 @@ bool iui_edit_with_selection(iui_context *ctx,
                 has_focus ? IUI_SELECTION_ALPHA : (IUI_SELECTION_ALPHA / 2);
             uint32_t selection_color =
                 iui_state_layer(ctx->colors.primary, sel_alpha);
-            ctx->renderer.draw_box(
+            iui_emit_box(
+                ctx,
                 (iui_rect_t) {visible_start, text_y,
                               visible_end - visible_start, ctx->font_height},
-                0.f, selection_color, ctx->renderer.user);
+                0.f, selection_color);
         }
     }
 
@@ -827,10 +826,11 @@ bool iui_edit_with_selection(iui_context *ctx,
                                            ctx, buffer, state->cursor, false);
         if (cursor_x >= text_clip.x &&
             cursor_x <= text_clip.x + text_clip.width) {
-            ctx->renderer.draw_box(
+            iui_emit_box(
+                ctx,
                 (iui_rect_t) {cursor_x, text_y, IUI_TEXTFIELD_CURSOR_WIDTH,
                               ctx->font_height},
-                0.f, ctx->colors.primary, ctx->renderer.user);
+                0.f, ctx->colors.primary);
         }
     }
 
@@ -1080,10 +1080,11 @@ iui_textfield_result iui_textfield_with_selection(
                 has_focus ? IUI_SELECTION_ALPHA : (IUI_SELECTION_ALPHA / 2);
             uint32_t selection_color =
                 iui_state_layer(ctx->colors.primary, sel_alpha);
-            ctx->renderer.draw_box(
+            iui_emit_box(
+                ctx,
                 (iui_rect_t) {visible_start, text_y,
                               visible_end - visible_start, ctx->font_height},
-                0.f, selection_color, ctx->renderer.user);
+                0.f, selection_color);
         }
     }
 
@@ -1110,10 +1111,11 @@ iui_textfield_result iui_textfield_with_selection(
                                                      opts.password_mode);
         if (cursor_x >= text_x_start &&
             cursor_x <= text_x_start + text_area_width) {
-            ctx->renderer.draw_box(
+            iui_emit_box(
+                ctx,
                 (iui_rect_t) {cursor_x, text_y, IUI_TEXTFIELD_CURSOR_WIDTH,
                               ctx->font_height},
-                0.f, ctx->colors.primary, ctx->renderer.user);
+                0.f, ctx->colors.primary);
         }
     }
 
@@ -1154,15 +1156,14 @@ static void checkbox_draw(iui_context *ctx,
                 iui_state_layer(ctx->colors.on_primary, IUI_STATE_FOCUS_ALPHA);
             bg_color = iui_blend_color(bg_color, focus_layer);
         }
-        ctx->renderer.draw_box(widget_rect, corner, bg_color,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, widget_rect, corner, bg_color);
         float mark_margin = widget_rect.width * 0.25f;
-        ctx->renderer.draw_box(
-            (iui_rect_t) {widget_rect.x + mark_margin,
-                          widget_rect.y + mark_margin,
-                          widget_rect.width - mark_margin * 2,
-                          widget_rect.height - mark_margin * 2},
-            corner * 0.5f, ctx->colors.on_primary, ctx->renderer.user);
+        iui_emit_box(ctx,
+                     (iui_rect_t) {widget_rect.x + mark_margin,
+                                   widget_rect.y + mark_margin,
+                                   widget_rect.width - mark_margin * 2,
+                                   widget_rect.height - mark_margin * 2},
+                     corner * 0.5f, ctx->colors.on_primary);
     } else {
         uint32_t bg_color = ctx->colors.surface_container;
         if (is_focused) {
@@ -1170,8 +1171,7 @@ static void checkbox_draw(iui_context *ctx,
                 iui_state_layer(ctx->colors.primary, IUI_STATE_FOCUS_ALPHA);
             bg_color = iui_blend_color(bg_color, focus_layer);
         }
-        ctx->renderer.draw_box(widget_rect, corner, bg_color,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, widget_rect, corner, bg_color);
     }
 }
 
@@ -1191,15 +1191,16 @@ static void radio_draw(iui_context *ctx,
             IUI_STATE_FOCUS_ALPHA);
         bg_color = iui_blend_color(bg_color, focus_layer);
     }
-    ctx->renderer.draw_box(widget_rect, corner, bg_color, ctx->renderer.user);
+    iui_emit_box(ctx, widget_rect, corner, bg_color);
 
     if (is_active) {
         float dot_size = widget_rect.width * 0.5f;
         float dot_margin = (widget_rect.width - dot_size) * 0.5f;
-        ctx->renderer.draw_box(
+        iui_emit_box(
+            ctx,
             (iui_rect_t) {widget_rect.x + dot_margin,
                           widget_rect.y + dot_margin, dot_size, dot_size},
-            dot_size * 0.5f, ctx->colors.on_primary, ctx->renderer.user);
+            dot_size * 0.5f, ctx->colors.on_primary);
     }
 }
 
@@ -1369,17 +1370,17 @@ bool iui_switch(iui_context *ctx,
     }
 
     /* Draw track (MD3: filled track when on, surface_variant when off) */
-    ctx->renderer.draw_box((iui_rect_t) {track_rect.x, track_rect.y,
-                                         track_rect.width, switch_track_height},
-                           corner, track_color, ctx->renderer.user);
+    iui_emit_box(ctx,
+                 (iui_rect_t) {track_rect.x, track_rect.y, track_rect.width,
+                               switch_track_height},
+                 corner, track_color);
 
     /* Draw thumb (filled circle) */
     float thumb_y = track_rect.y + thumb_margin;
     uint32_t thumb_color =
         *value ? ctx->colors.on_primary : ctx->colors.outline;
-    ctx->renderer.draw_box(
-        (iui_rect_t) {thumb_x, thumb_y, thumb_size, thumb_size},
-        thumb_size * 0.5f, thumb_color, ctx->renderer.user);
+    iui_emit_box(ctx, (iui_rect_t) {thumb_x, thumb_y, thumb_size, thumb_size},
+                 thumb_size * 0.5f, thumb_color);
 
     /* Optionally draw icons inside thumb (scale to fit within thumb) */
     if ((*value && on_icon) || (!(*value) && off_icon)) {
@@ -1522,7 +1523,7 @@ bool iui_dropdown(iui_context *ctx, const iui_dropdown_options *options)
         options->disabled ? iui_state_layer(ctx->colors.surface_container_high,
                                             IUI_STATE_DISABLE_ALPHA)
                           : ctx->colors.surface_container_highest;
-    ctx->renderer.draw_box(field_rect, corner, bg_color, ctx->renderer.user);
+    iui_emit_box(ctx, field_rect, corner, bg_color);
 
     /* Draw underline indicator for filled style */
     if (!is_open) {
@@ -1532,21 +1533,19 @@ bool iui_dropdown(iui_context *ctx, const iui_dropdown_options *options)
                                   : ctx->colors.on_surface_variant;
         iui_rect_t underline = {field_rect.x, field_rect.y + field_h - 1.f,
                                 field_rect.width, 1.f};
-        ctx->renderer.draw_box(underline, 0.f, line_color, ctx->renderer.user);
+        iui_emit_box(ctx, underline, 0.f, line_color);
     } else {
         /* Draw active indicator (2px primary underline) */
         iui_rect_t underline = {field_rect.x, field_rect.y + field_h - 2.f,
                                 field_rect.width, 2.f};
-        ctx->renderer.draw_box(underline, 0.f, ctx->colors.primary,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, underline, 0.f, ctx->colors.primary);
     }
 
     /* Draw state layer */
     if (!options->disabled && iui_state_is_interactive(state)) {
         uint32_t layer_color =
             iui_state_layer(ctx->colors.on_surface, iui_state_get_alpha(state));
-        ctx->renderer.draw_box(field_rect, corner, layer_color,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, field_rect, corner, layer_color);
     }
 
     /* Draw floating label */
@@ -1626,8 +1625,7 @@ bool iui_dropdown(iui_context *ctx, const iui_dropdown_options *options)
 
         /* Draw menu shadow and background */
         iui_draw_shadow(ctx, menu_rect, corner, IUI_ELEVATION_3);
-        ctx->renderer.draw_box(menu_rect, corner, ctx->colors.surface_container,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, menu_rect, corner, ctx->colors.surface_container);
 
         /* Draw menu items */
         for (int i = 0; i < options->option_count; i++) {
@@ -1647,14 +1645,12 @@ bool iui_dropdown(iui_context *ctx, const iui_dropdown_options *options)
             /* Draw selection/hover background */
             if (i == selected) {
                 /* Selected item has subtle background */
-                ctx->renderer.draw_box(item_rect, 0.f,
-                                       ctx->colors.secondary_container,
-                                       ctx->renderer.user);
+                iui_emit_box(ctx, item_rect, 0.f,
+                             ctx->colors.secondary_container);
             } else if (iui_state_is_interactive(item_state)) {
                 uint32_t layer_color = iui_state_layer(
                     ctx->colors.on_surface, iui_state_get_alpha(item_state));
-                ctx->renderer.draw_box(item_rect, 0.f, layer_color,
-                                       ctx->renderer.user);
+                iui_emit_box(ctx, item_rect, 0.f, layer_color);
             }
 
             /* Draw item text */

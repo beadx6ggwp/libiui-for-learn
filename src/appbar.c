@@ -70,7 +70,7 @@ bool iui_top_app_bar(iui_context *ctx,
 
     /* Draw background (no corner radius for app bar) */
     iui_rect_t bar_rect = {bar_x, bar_y, bar_width, bar_height};
-    ctx->renderer.draw_box(bar_rect, 0.f, bg_color, ctx->renderer.user);
+    iui_emit_box(ctx, bar_rect, 0.f, bg_color);
 
     /* Draw elevation shadow if scrolled (Level 2) */
     if (collapse_progress > 0.f) {
@@ -108,13 +108,13 @@ bool iui_top_app_bar(iui_context *ctx,
     if (nav_pressed) {
         uint32_t state_color =
             iui_state_layer(icon_color, IUI_STATE_PRESS_ALPHA);
-        ctx->renderer.draw_box(nav_rect, IUI_APPBAR_ICON_BUTTON_SIZE * 0.5f,
-                               state_color, ctx->renderer.user);
+        iui_emit_box(ctx, nav_rect, IUI_APPBAR_ICON_BUTTON_SIZE * 0.5f,
+                     state_color);
     } else if (nav_hovered) {
         uint32_t state_color =
             iui_state_layer(icon_color, IUI_STATE_HOVER_ALPHA);
-        ctx->renderer.draw_box(nav_rect, IUI_APPBAR_ICON_BUTTON_SIZE * 0.5f,
-                               state_color, ctx->renderer.user);
+        iui_emit_box(ctx, nav_rect, IUI_APPBAR_ICON_BUTTON_SIZE * 0.5f,
+                     state_color);
     }
 
     /* Draw menu icon */
@@ -237,13 +237,13 @@ bool iui_top_app_bar_action(iui_context *ctx, const char *icon)
     if (pressed) {
         uint32_t state_color =
             iui_state_layer(icon_color, IUI_STATE_PRESS_ALPHA);
-        ctx->renderer.draw_box(action_rect, IUI_APPBAR_ICON_BUTTON_SIZE * 0.5f,
-                               state_color, ctx->renderer.user);
+        iui_emit_box(ctx, action_rect, IUI_APPBAR_ICON_BUTTON_SIZE * 0.5f,
+                     state_color);
     } else if (hovered) {
         uint32_t state_color =
             iui_state_layer(icon_color, IUI_STATE_HOVER_ALPHA);
-        ctx->renderer.draw_box(action_rect, IUI_APPBAR_ICON_BUTTON_SIZE * 0.5f,
-                               state_color, ctx->renderer.user);
+        iui_emit_box(ctx, action_rect, IUI_APPBAR_ICON_BUTTON_SIZE * 0.5f,
+                     state_color);
     }
 
     /* Draw action icon */

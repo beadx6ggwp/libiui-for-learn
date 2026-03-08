@@ -181,8 +181,7 @@ static bool iui_chip_internal(iui_context *ctx,
 
     /* Draw chip container */
     if (draw_container) {
-        ctx->renderer.draw_box(chip_rect, corner_radius, container_color,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, chip_rect, corner_radius, container_color);
     }
 
     /* Draw outline */
@@ -190,62 +189,63 @@ static bool iui_chip_internal(iui_context *ctx,
         float outline_width = 1.f;
 
         if (ctx->renderer.draw_arc) {
-            /* Best quality: use arcs for smooth rounded corners */
+            /* Best quality: use arcs for smooth rounded corners.
+             * Track ink-bounds for the full chip outline once.
+             * Expand by outline_width to include arc stroke thickness
+             * so dirty-region redraw does not miss corner pixels.
+             */
+            iui_ink_bounds_extend(ctx, chip_rect.x - outline_width,
+                                  chip_rect.y - outline_width,
+                                  chip_rect.width + 2 * outline_width,
+                                  chip_rect.height + 2 * outline_width);
             /* Top edge */
             iui_rect_t top_edge = {chip_rect.x + corner_radius, chip_rect.y,
                                    chip_rect.width - 2 * corner_radius,
                                    outline_width};
-            ctx->renderer.draw_box(top_edge, 0.f, outline_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, top_edge, 0.f, outline_color);
             /* Bottom edge */
             iui_rect_t bottom_edge = {
                 chip_rect.x + corner_radius,
                 chip_rect.y + chip_rect.height - outline_width,
                 chip_rect.width - 2 * corner_radius, outline_width};
-            ctx->renderer.draw_box(bottom_edge, 0.f, outline_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, bottom_edge, 0.f, outline_color);
             /* Left edge */
             iui_rect_t left_edge = {chip_rect.x, chip_rect.y + corner_radius,
                                     outline_width,
                                     chip_rect.height - 2 * corner_radius};
-            ctx->renderer.draw_box(left_edge, 0.f, outline_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, left_edge, 0.f, outline_color);
             /* Right edge */
             iui_rect_t right_edge = {
                 chip_rect.x + chip_rect.width - outline_width,
                 chip_rect.y + corner_radius, outline_width,
                 chip_rect.height - 2 * corner_radius};
-            ctx->renderer.draw_box(right_edge, 0.f, outline_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, right_edge, 0.f, outline_color);
             /* Top-left corner arc */
-            ctx->renderer.draw_arc(chip_rect.x + corner_radius,
-                                   chip_rect.y + corner_radius, corner_radius,
-                                   IUI_PI, 1.5f * IUI_PI, outline_width,
-                                   outline_color, ctx->renderer.user);
+            iui_draw_arc_soft(ctx, chip_rect.x + corner_radius,
+                              chip_rect.y + corner_radius, corner_radius,
+                              IUI_PI, 1.5f * IUI_PI, outline_width,
+                              outline_color);
             /* Top-right corner arc */
-            ctx->renderer.draw_arc(
-                chip_rect.x + chip_rect.width - corner_radius,
+            iui_draw_arc_soft(
+                ctx, chip_rect.x + chip_rect.width - corner_radius,
                 chip_rect.y + corner_radius, corner_radius, 1.5f * IUI_PI,
-                2.f * IUI_PI, outline_width, outline_color, ctx->renderer.user);
+                2.f * IUI_PI, outline_width, outline_color);
             /* Bottom-right corner arc */
-            ctx->renderer.draw_arc(
-                chip_rect.x + chip_rect.width - corner_radius,
+            iui_draw_arc_soft(
+                ctx, chip_rect.x + chip_rect.width - corner_radius,
                 chip_rect.y + chip_rect.height - corner_radius, corner_radius,
-                0.f, 0.5f * IUI_PI, outline_width, outline_color,
-                ctx->renderer.user);
+                0.f, 0.5f * IUI_PI, outline_width, outline_color);
             /* Bottom-left corner arc */
-            ctx->renderer.draw_arc(
-                chip_rect.x + corner_radius,
-                chip_rect.y + chip_rect.height - corner_radius, corner_radius,
-                0.5f * IUI_PI, IUI_PI, outline_width, outline_color,
-                ctx->renderer.user);
+            iui_draw_arc_soft(ctx, chip_rect.x + corner_radius,
+                              chip_rect.y + chip_rect.height - corner_radius,
+                              corner_radius, 0.5f * IUI_PI, IUI_PI,
+                              outline_width, outline_color);
         } else if (draw_container) {
             /* Fallback with container: overlay approach creates outline
              * by drawing outer rect with outline color and inner rect with
              * container color to simulate border
              */
-            ctx->renderer.draw_box(chip_rect, corner_radius, outline_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, chip_rect, corner_radius, outline_color);
             /* Inner rounded rect (container color) to create outline effect */
             iui_rect_t inner_rect = {chip_rect.x + outline_width,
                                      chip_rect.y + outline_width,
@@ -254,8 +254,7 @@ static bool iui_chip_internal(iui_context *ctx,
             float inner_corner = corner_radius > outline_width
                                      ? corner_radius - outline_width
                                      : 0.f;
-            ctx->renderer.draw_box(inner_rect, inner_corner, container_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, inner_rect, inner_corner, container_color);
         } else {
             /* Fallback without container: draw edges only (corners have small
              * gaps)
@@ -264,25 +263,21 @@ static bool iui_chip_internal(iui_context *ctx,
              */
             iui_rect_t top_edge_full = {chip_rect.x, chip_rect.y,
                                         chip_rect.width, outline_width};
-            ctx->renderer.draw_box(top_edge_full, 0.f, outline_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, top_edge_full, 0.f, outline_color);
             /* Bottom edge */
             iui_rect_t bottom_edge_full = {
                 chip_rect.x, chip_rect.y + chip_rect.height - outline_width,
                 chip_rect.width, outline_width};
-            ctx->renderer.draw_box(bottom_edge_full, 0.f, outline_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, bottom_edge_full, 0.f, outline_color);
             /* Left edge */
             iui_rect_t left_edge_full = {chip_rect.x, chip_rect.y,
                                          outline_width, chip_rect.height};
-            ctx->renderer.draw_box(left_edge_full, 0.f, outline_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, left_edge_full, 0.f, outline_color);
             /* Right edge */
             iui_rect_t right_edge_full = {
                 chip_rect.x + chip_rect.width - outline_width, chip_rect.y,
                 outline_width, chip_rect.height};
-            ctx->renderer.draw_box(right_edge_full, 0.f, outline_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, right_edge_full, 0.f, outline_color);
         }
     }
 

@@ -170,17 +170,16 @@ int iui_dialog(iui_context *ctx,
 
     /* Draw scrim (semi-transparent overlay) */
     uint32_t scrim_color = ctx->colors.scrim;
-    ctx->renderer.draw_box((iui_rect_t) {0, 0, screen_width, screen_height}, 0,
-                           scrim_color, ctx->renderer.user);
+    iui_emit_box(ctx, (iui_rect_t) {0, 0, screen_width, screen_height}, 0,
+                 scrim_color);
 
     /* Draw dialog shadow (elevation_3 for dialogs per MD3) */
     float corner = IUI_DIALOG_CORNER_RADIUS;
     iui_draw_shadow(ctx, dialog_bounds, corner, IUI_ELEVATION_3);
 
     /* Draw dialog background */
-    ctx->renderer.draw_box(dialog_bounds, corner,
-                           ctx->colors.surface_container_high,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, dialog_bounds, corner,
+                 ctx->colors.surface_container_high);
 
     /* Track component for MD3 validation */
     IUI_MD3_TRACK_DIALOG(dialog_bounds, corner);
@@ -239,8 +238,7 @@ int iui_dialog(iui_context *ctx,
                 /* Primary button (rightmost) - filled style */
                 uint32_t bg_color = ctx->colors.primary;
                 text_color = ctx->colors.on_primary;
-                ctx->renderer.draw_box(btn_rect, btn_corner, bg_color,
-                                       ctx->renderer.user);
+                iui_emit_box(ctx, btn_rect, btn_corner, bg_color);
             }
 
             /* Draw state layer for hover/press */
@@ -341,8 +339,7 @@ bool iui_fullscreen_dialog_begin(iui_context *ctx,
     iui_register_blocking_region(ctx, screen_bounds);
 
     /* Draw full-screen surface background */
-    ctx->renderer.draw_box(screen_bounds, 0.f, ctx->colors.surface,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, screen_bounds, 0.f, ctx->colors.surface);
 
     /* Header bar dimensions */
     float header_h = IUI_FULLSCREEN_DIALOG_HEADER_HEIGHT;
@@ -436,8 +433,7 @@ bool iui_fullscreen_dialog_action(iui_context *ctx,
 
     if (dialog->action_count == 0) {
         /* Primary action - filled button */
-        ctx->renderer.draw_box(btn_rect, corner, ctx->colors.primary,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, btn_rect, corner, ctx->colors.primary);
         text_color = ctx->colors.on_primary;
     } else {
         /* Secondary action - text button */

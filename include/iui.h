@@ -3245,14 +3245,16 @@ int iui_a11y_describe(const iui_a11y_hint *hint, char *buf, size_t buf_size);
 
 /* Performance Optimization API
  *
- * Three core performance systems (always available, disabled by default):
+ * Four core performance systems (always available, disabled by default):
  * 1. Draw Call Batching - buffers draw commands to reduce state changes
  * 2. Dirty Rectangle Tracking - skips redrawing unchanged regions
- * 3. Text Width Caching - caches text measurement results
+ * 3. Ink-Bounds Tracking - tracks union bounding box of all draw calls
+ * 4. Text Width Caching - caches text measurement results
  *
  * Usage:
  * iui_batch_enable(ctx, true);      // Enable draw batching
  * iui_dirty_enable(ctx, true);      // Enable dirty rect tracking
+ * iui_ink_bounds_enable(ctx, true); // Enable ink-bounds tracking
  * iui_text_cache_enable(ctx, true); // Enable text cache
  */
 
@@ -3290,6 +3292,21 @@ void iui_dirty_invalidate_all(iui_context *ctx);
  * Returns number of dirty regions in current frame
  */
 int iui_dirty_count(const iui_context *ctx);
+
+/* Ink-Bounds Tracking
+ * Tracks the union bounding box of all draw calls within a frame.
+ * When enabled, backends can query the drawn region to blit only the
+ * ink-bounds area instead of the full framebuffer.
+ */
+void iui_ink_bounds_enable(iui_context *ctx, bool enable);
+
+/* Query the ink-bounds rectangle for the current frame.
+ * Returns false if no draw calls were made this frame.
+ */
+bool iui_ink_bounds_get(const iui_context *ctx, iui_rect_t *out);
+
+/* Check if any draw calls were made this frame */
+bool iui_ink_bounds_valid(const iui_context *ctx);
 
 /* Text Width Caching
  * Enable/disable text measurement caching. When enabled, text width

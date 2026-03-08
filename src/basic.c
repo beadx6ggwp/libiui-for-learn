@@ -41,9 +41,9 @@ void iui_segmented(iui_context *ctx,
         *selected = 0;
 
     /* MD3: Draw unified pill background (visible container for all segments) */
-    ctx->renderer.draw_box(
-        (iui_rect_t) {seg_x_start, seg_y, ctx->layout.width, seg_height},
-        pill_radius, ctx->colors.surface_container_highest, ctx->renderer.user);
+    iui_emit_box(
+        ctx, (iui_rect_t) {seg_x_start, seg_y, ctx->layout.width, seg_height},
+        pill_radius, ctx->colors.surface_container_highest);
 
     /* Track component for MD3 validation */
     IUI_MD3_TRACK_SEGMENTED(
@@ -63,9 +63,8 @@ void iui_segmented(iui_context *ctx,
         if (*selected == 0 || *selected == num_entries - 1)
             corner = pill_radius;
 
-        ctx->renderer.draw_box(
-            (iui_rect_t) {sel_x, seg_y, seg_width, seg_height}, corner,
-            ctx->colors.secondary_container, ctx->renderer.user);
+        iui_emit_box(ctx, (iui_rect_t) {sel_x, seg_y, seg_width, seg_height},
+                     corner, ctx->colors.secondary_container);
     }
 
     /* Draw each segment */
@@ -92,9 +91,9 @@ void iui_segmented(iui_context *ctx,
             uint32_t hover_color = iui_state_layer(
                 ctx->colors.on_surface, iui_state_get_alpha(seg_state));
             float corner = (i == 0 || i == num_entries - 1) ? pill_radius : 0.f;
-            ctx->renderer.draw_box(
-                (iui_rect_t) {seg_x, seg_y, seg_width, seg_height}, corner,
-                hover_color, ctx->renderer.user);
+            iui_emit_box(ctx,
+                         (iui_rect_t) {seg_x, seg_y, seg_width, seg_height},
+                         corner, hover_color);
         }
 
         /* Handle selection change */
@@ -288,16 +287,15 @@ float iui_slider_ex(iui_context *ctx,
         iui_get_component_state(ctx, touch_rect, disabled);
 
     /* Draw inactive track (full width, behind active track) */
-    ctx->renderer.draw_box(track_rect, track_rect.height * .5f, inactive_color,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, track_rect, track_rect.height * .5f, inactive_color);
 
     /* Draw active track (left side up to thumb) */
     float active_width = thumb_x - track_rect.x;
     if (active_width > 0) {
-        ctx->renderer.draw_box((iui_rect_t) {track_rect.x, track_rect.y,
-                                             active_width, track_rect.height},
-                               track_rect.height * .5f, active_color,
-                               ctx->renderer.user);
+        iui_emit_box(ctx,
+                     (iui_rect_t) {track_rect.x, track_rect.y, active_width,
+                                   track_rect.height},
+                     track_rect.height * .5f, active_color);
     }
 
     /* Handle thumb interaction */
@@ -379,9 +377,9 @@ float iui_slider_ex(iui_context *ctx,
         uint8_t alpha =
             is_dragging ? IUI_STATE_DRAG_ALPHA : IUI_STATE_HOVER_ALPHA;
         uint32_t state_color = iui_state_layer(handle_color, alpha);
-        ctx->renderer.draw_box(
-            (iui_rect_t) {state_x, state_y, state_size, state_size},
-            state_size * 0.5f, state_color, ctx->renderer.user);
+        iui_emit_box(ctx,
+                     (iui_rect_t) {state_x, state_y, state_size, state_size},
+                     state_size * 0.5f, state_color);
     }
 
     /* Draw value indicator bubble during drag */
@@ -415,10 +413,10 @@ float iui_slider_ex(iui_context *ctx,
         }
 
         /* Draw indicator background (pill shape with primary color) */
-        ctx->renderer.draw_box((iui_rect_t) {indicator_x, indicator_y,
-                                             indicator_width, indicator_height},
-                               indicator_height * 0.5f, active_color,
-                               ctx->renderer.user);
+        iui_emit_box(ctx,
+                     (iui_rect_t) {indicator_x, indicator_y, indicator_width,
+                                   indicator_height},
+                     indicator_height * 0.5f, active_color);
 
         /* Draw value text centered in indicator */
         iui_rect_t indicator_text_rect = {
@@ -439,8 +437,7 @@ float iui_slider_ex(iui_context *ctx,
     }
 
     /* Draw thumb (circle) */
-    ctx->renderer.draw_box(thumb_rect, half_size, handle_color,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, thumb_rect, half_size, handle_color);
 
     iui_newline(ctx);
 
@@ -636,16 +633,15 @@ bool iui_range_slider(iui_context *ctx,
     thumb_high_x = norm_high * track_rect.width + track_rect.x;
 
     /* Draw inactive track (full width) */
-    ctx->renderer.draw_box(track_rect, track_height * 0.5f, inactive_color,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, track_rect, track_height * 0.5f, inactive_color);
 
     /* Draw active track (between thumbs) */
     float active_x = thumb_low_x;
     float active_w = thumb_high_x - thumb_low_x;
     if (active_w > 0.f) {
-        ctx->renderer.draw_box(
-            (iui_rect_t) {active_x, track_rect.y, active_w, track_height},
-            track_height * 0.5f, active_color, ctx->renderer.user);
+        iui_emit_box(
+            ctx, (iui_rect_t) {active_x, track_rect.y, active_w, track_height},
+            track_height * 0.5f, active_color);
     }
 
     /* State layers on hover/drag */
@@ -660,9 +656,10 @@ bool iui_range_slider(iui_context *ctx,
             uint8_t alpha =
                 dragging ? IUI_STATE_DRAG_ALPHA : IUI_STATE_HOVER_ALPHA;
             uint32_t sc = iui_state_layer(handle_color, alpha);
-            ctx->renderer.draw_box(
+            iui_emit_box(
+                ctx,
                 (iui_rect_t) {tx - ss * 0.5f, center_y - ss * 0.5f, ss, ss},
-                ss * 0.5f, sc, ctx->renderer.user);
+                ss * 0.5f, sc);
         }
     }
 
@@ -672,14 +669,16 @@ bool iui_range_slider(iui_context *ctx,
     float draw_size_low = draw_half_low * 2.f;
     float draw_size_high = draw_half_high * 2.f;
 
-    ctx->renderer.draw_box(
+    iui_emit_box(
+        ctx,
         (iui_rect_t) {thumb_low_x - draw_half_low, center_y - draw_half_low,
                       draw_size_low, draw_size_low},
-        draw_half_low, handle_color, ctx->renderer.user);
-    ctx->renderer.draw_box(
+        draw_half_low, handle_color);
+    iui_emit_box(
+        ctx,
         (iui_rect_t) {thumb_high_x - draw_half_high, center_y - draw_half_high,
                       draw_size_high, draw_size_high},
-        draw_half_high, handle_color, ctx->renderer.user);
+        draw_half_high, handle_color);
 
     /* MD3 validation */
     IUI_MD3_TRACK_SLIDER(touch_low, touch_low.height * 0.5f);
@@ -883,17 +882,14 @@ bool iui_button_styled(iui_context *ctx,
         iui_draw_focus_ring(ctx, button_rect, corner);
 
     if (bg_color != 0) {
-        ctx->renderer.draw_box(button_rect, corner, bg_color,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, button_rect, corner, bg_color);
     } else if (is_focused && focus_layer != 0) {
         /* MD3: Show focus state layer for text/outlined buttons (no bg) */
-        ctx->renderer.draw_box(button_rect, corner, focus_layer,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, button_rect, corner, focus_layer);
     } else if (state == IUI_STATE_HOVERED && hover_layer != 0) {
         /* MD3: Text buttons show state layer on hover (no bg, but visible
          * hover) */
-        ctx->renderer.draw_box(button_rect, corner, hover_layer,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, button_rect, corner, hover_layer);
     }
 
     /* Draw border if specified (for outlined buttons) */

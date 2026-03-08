@@ -145,17 +145,14 @@ bool iui_date_picker(iui_context *ctx,
 
     /* Draw scrim */
     iui_rect_t scrim_rect = {0, 0, screen_width, screen_height};
-    ctx->renderer.draw_box(scrim_rect, 0, ctx->colors.scrim,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, scrim_rect, 0, ctx->colors.scrim);
 
     /* Draw dialog shadow */
     float corner = IUI_DIALOG_CORNER_RADIUS;
     iui_draw_shadow(ctx, dialog_rect, corner, IUI_ELEVATION_3);
 
     /* Draw dialog background */
-    ctx->renderer.draw_box(dialog_rect, corner,
-                           ctx->colors.surface_container_high,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, dialog_rect, corner, ctx->colors.surface_container_high);
 
     /* Navigation: Month Year with arrows (MD3 uses nav_h for this row) */
     float nav_y = dialog_y + padding;
@@ -272,8 +269,7 @@ bool iui_date_picker(iui_context *ctx,
             /* Draw selection background OR state layer (mutually exclusive) */
             if (is_selected) {
                 /* Selected day: filled primary rounded rect */
-                ctx->renderer.draw_box(vis_rect, day_corner,
-                                       ctx->colors.primary, ctx->renderer.user);
+                iui_emit_box(ctx, vis_rect, day_corner, ctx->colors.primary);
             } else if (cell_state == IUI_STATE_HOVERED ||
                        cell_state == IUI_STATE_PRESSED) {
                 /* State layer covers full touch target for proper feedback */
@@ -282,10 +278,8 @@ bool iui_date_picker(iui_context *ctx,
                                     : IUI_STATE_HOVER_ALPHA;
                 /* circular touch feedback */
                 float touch_corner = cell_w * 0.5f;
-                ctx->renderer.draw_box(
-                    touch_rect, touch_corner,
-                    iui_state_layer(ctx->colors.on_surface, alpha),
-                    ctx->renderer.user);
+                iui_emit_box(ctx, touch_rect, touch_corner,
+                             iui_state_layer(ctx->colors.on_surface, alpha));
             }
 
             /* Draw day number centered in visual rect */
@@ -344,8 +338,7 @@ bool iui_date_picker(iui_context *ctx,
     /* OK button (filled style) */
     iui_rect_t ok_rect = {ok_x, btn_y, ok_w, button_h};
     iui_state_t ok_state = iui_get_component_state(ctx, ok_rect, false);
-    ctx->renderer.draw_box(ok_rect, button_h * 0.5f, ctx->colors.primary,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, ok_rect, button_h * 0.5f, ctx->colors.primary);
     iui_draw_state_layer(ctx, ok_rect, button_h * 0.5f, ctx->colors.on_primary,
                          ok_state);
     float ok_text_x =
@@ -489,17 +482,14 @@ bool iui_time_picker(iui_context *ctx,
 
     /* Draw scrim */
     iui_rect_t scrim_rect = {0, 0, screen_width, screen_height};
-    ctx->renderer.draw_box(scrim_rect, 0, ctx->colors.scrim,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, scrim_rect, 0, ctx->colors.scrim);
 
     /* Draw dialog shadow */
     float corner = IUI_SHAPE_EXTRA_LARGE;
     iui_draw_shadow(ctx, dialog_rect, corner, IUI_ELEVATION_3);
 
     /* Draw dialog background */
-    ctx->renderer.draw_box(dialog_rect, corner,
-                           ctx->colors.surface_container_high,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, dialog_rect, corner, ctx->colors.surface_container_high);
 
     /* Header: Time display (HH:MM) */
     float header_y = dialog_y + padding;
@@ -534,7 +524,7 @@ bool iui_time_picker(iui_context *ctx,
                                    : ctx->colors.surface_container_highest;
     uint32_t hour_text =
         hour_active ? ctx->colors.on_primary_container : ctx->colors.on_surface;
-    ctx->renderer.draw_box(hour_rect, 8.f, hour_bg, ctx->renderer.user);
+    iui_emit_box(ctx, hour_rect, 8.f, hour_bg);
     iui_draw_state_layer(ctx, hour_rect, 8.f, hour_text, hour_state);
     float hour_text_w = iui_get_text_width(ctx, hour_str);
     float hour_text_x = hour_rect.x + (hour_rect.width - hour_text_w) * 0.5f;
@@ -557,15 +547,13 @@ bool iui_time_picker(iui_context *ctx,
                                     : ctx->colors.surface_container_highest;
     uint32_t min_text = minute_active ? ctx->colors.on_primary_container
                                       : ctx->colors.on_surface;
-    ctx->renderer.draw_box(minute_rect, 8.f, min_bg, ctx->renderer.user);
+    iui_emit_box(ctx, minute_rect, 8.f, min_bg);
     if (minute_state == IUI_STATE_HOVERED ||
         minute_state == IUI_STATE_PRESSED) {
         uint8_t alpha = (minute_state == IUI_STATE_PRESSED)
                             ? IUI_STATE_PRESS_ALPHA
                             : IUI_STATE_HOVER_ALPHA;
-        ctx->renderer.draw_box(minute_rect, 8.f,
-                               iui_state_layer(min_text, alpha),
-                               ctx->renderer.user);
+        iui_emit_box(ctx, minute_rect, 8.f, iui_state_layer(min_text, alpha));
     }
     float min_text_w = iui_get_text_width(ctx, minute_str);
     float min_text_x = minute_rect.x + (minute_rect.width - min_text_w) * 0.5f;
@@ -600,7 +588,7 @@ bool iui_time_picker(iui_context *ctx,
                                      : ctx->colors.surface_container_highest;
         uint32_t am_text_color = am_selected ? ctx->colors.on_tertiary_container
                                              : ctx->colors.on_surface_variant;
-        ctx->renderer.draw_box(am_rect, 8.f, am_bg, ctx->renderer.user);
+        iui_emit_box(ctx, am_rect, 8.f, am_bg);
         iui_draw_state_layer(ctx, am_rect, 8.f, am_text_color, am_state);
         float am_w = iui_get_text_width(ctx, "AM");
         iui_internal_draw_text(
@@ -618,7 +606,7 @@ bool iui_time_picker(iui_context *ctx,
                                      : ctx->colors.surface_container_highest;
         uint32_t pm_text_color = pm_selected ? ctx->colors.on_tertiary_container
                                              : ctx->colors.on_surface_variant;
-        ctx->renderer.draw_box(pm_rect, 8.f, pm_bg, ctx->renderer.user);
+        iui_emit_box(ctx, pm_rect, 8.f, pm_bg);
         iui_draw_state_layer(ctx, pm_rect, 8.f, pm_text_color, pm_state);
         float pm_w = iui_get_text_width(ctx, "PM");
         iui_internal_draw_text(
@@ -644,16 +632,14 @@ bool iui_time_picker(iui_context *ctx,
 
     /* Draw dial background */
     iui_rect_t dial_bg_rect = {dial_x, dial_y, dial_size, dial_size};
-    ctx->renderer.draw_box(dial_bg_rect, dial_r,
-                           ctx->colors.surface_container_highest,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, dial_bg_rect, dial_r,
+                 ctx->colors.surface_container_highest);
 
     /* Draw center dot */
     iui_rect_t center_dot_rect = {dial_cx - center_dot * 0.5f,
                                   dial_cy - center_dot * 0.5f, center_dot,
                                   center_dot};
-    ctx->renderer.draw_box(center_dot_rect, center_dot * 0.5f,
-                           ctx->colors.primary, ctx->renderer.user);
+    iui_emit_box(ctx, center_dot_rect, center_dot * 0.5f, ctx->colors.primary);
 
     /* Calculate number positions and draw */
     int num_count = 12;                /* 12 numbers for both hour and minute */
@@ -710,17 +696,15 @@ bool iui_time_picker(iui_context *ctx,
 
         /* Draw selection circle */
         if (is_selected) {
-            ctx->renderer.draw_box(num_rect, selector_size * 0.5f,
-                                   ctx->colors.primary, ctx->renderer.user);
+            iui_emit_box(ctx, num_rect, selector_size * 0.5f,
+                         ctx->colors.primary);
         } else if (num_state == IUI_STATE_HOVERED ||
                    num_state == IUI_STATE_PRESSED) {
             uint8_t alpha = (num_state == IUI_STATE_PRESSED)
                                 ? IUI_STATE_PRESS_ALPHA
                                 : IUI_STATE_HOVER_ALPHA;
-            ctx->renderer.draw_box(
-                num_rect, selector_size * 0.5f,
-                iui_state_layer(ctx->colors.on_surface, alpha),
-                ctx->renderer.user);
+            iui_emit_box(ctx, num_rect, selector_size * 0.5f,
+                         iui_state_layer(ctx->colors.on_surface, alpha));
         }
 
         /* Draw number text */
@@ -743,6 +727,9 @@ bool iui_time_picker(iui_context *ctx,
         iui_polar_to_cart(dial_cx, dial_cy, num_radius - selector_size * 0.3f,
                           sel_angle, &sel_x, &sel_y);
 
+        iui_ink_bounds_extend(
+            ctx, fminf(dial_cx, sel_x) - 1.f, fminf(dial_cy, sel_y) - 1.f,
+            fabsf(sel_x - dial_cx) + 2.f, fabsf(sel_y - dial_cy) + 2.f);
         ctx->renderer.draw_line(dial_cx, dial_cy, sel_x, sel_y, 2.f,
                                 ctx->colors.primary, ctx->renderer.user);
     }
@@ -788,8 +775,7 @@ bool iui_time_picker(iui_context *ctx,
     /* OK button */
     iui_rect_t ok_rect = {ok_x, btn_y, ok_w, button_h};
     iui_state_t ok_state = iui_get_component_state(ctx, ok_rect, false);
-    ctx->renderer.draw_box(ok_rect, button_h * 0.5f, ctx->colors.primary,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, ok_rect, button_h * 0.5f, ctx->colors.primary);
     iui_draw_state_layer(ctx, ok_rect, button_h * 0.5f, ctx->colors.on_primary,
                          ok_state);
     float ok_text_x =

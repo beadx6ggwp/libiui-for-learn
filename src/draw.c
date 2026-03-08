@@ -1,5 +1,200 @@
 #include "internal.h"
 
+#include <float.h>
+
+/* Ink-bounds tracking */
+
+void iui_ink_bounds_init(iui_context *ctx)
+{
+    if (!ctx)
+        return;
+    ctx->ink_bounds.min_x = FLT_MAX;
+    ctx->ink_bounds.min_y = FLT_MAX;
+    ctx->ink_bounds.max_x = -FLT_MAX;
+    ctx->ink_bounds.max_y = -FLT_MAX;
+    ctx->ink_bounds.valid = false;
+    ctx->ink_bounds.enabled = false;
+}
+
+void iui_ink_bounds_reset(iui_context *ctx)
+{
+    if (!ctx)
+        return;
+    ctx->ink_bounds.min_x = FLT_MAX;
+    ctx->ink_bounds.min_y = FLT_MAX;
+    ctx->ink_bounds.max_x = -FLT_MAX;
+    ctx->ink_bounds.max_y = -FLT_MAX;
+    ctx->ink_bounds.valid = false;
+}
+
+void iui_ink_bounds_enable(iui_context *ctx, bool enable)
+{
+    if (!ctx)
+        return;
+    ctx->ink_bounds.enabled = enable;
+    if (enable)
+        iui_ink_bounds_reset(ctx);
+}
+
+bool iui_ink_bounds_get(const iui_context *ctx, iui_rect_t *out)
+{
+    if (!ctx || !ctx->ink_bounds.valid || !out)
+        return false;
+    out->x = ctx->ink_bounds.min_x;
+    out->y = ctx->ink_bounds.min_y;
+    out->width = ctx->ink_bounds.max_x - ctx->ink_bounds.min_x;
+    out->height = ctx->ink_bounds.max_y - ctx->ink_bounds.min_y;
+    return true;
+}
+
+bool iui_ink_bounds_valid(const iui_context *ctx)
+{
+    return ctx && ctx->ink_bounds.valid;
+}
+
+/* Draw call batch add functions */
+
+bool iui_batch_add_rect(iui_context *ctx,
+                        float x,
+                        float y,
+                        float w,
+                        float h,
+                        float radius,
+                        uint32_t color)
+{
+    if (!ctx || !ctx->batch.enabled)
+        return false;
+    if (ctx->batch.count >= IUI_DRAW_CMD_BUFFER_SIZE) {
+        /* Buffer full: flush and retry */
+        iui_batch_flush(ctx);
+    }
+    if (ctx->batch.count >= IUI_DRAW_CMD_BUFFER_SIZE)
+        return false;
+
+    iui_draw_cmd *cmd = &ctx->batch.commands[ctx->batch.count++];
+    cmd->type = IUI_CMD_RECT;
+    cmd->data.rect.x = x;
+    cmd->data.rect.y = y;
+    cmd->data.rect.w = w;
+    cmd->data.rect.h = h;
+    cmd->data.rect.radius = radius;
+    cmd->color = color;
+    cmd->clip = ctx->current_clip;
+    return true;
+}
+
+bool iui_batch_add_text(iui_context *ctx,
+                        float x,
+                        float y,
+                        const char *text,
+                        uint32_t color)
+{
+    if (!ctx || !ctx->batch.enabled || !text)
+        return false;
+    if (ctx->batch.count >= IUI_DRAW_CMD_BUFFER_SIZE)
+        iui_batch_flush(ctx);
+    if (ctx->batch.count >= IUI_DRAW_CMD_BUFFER_SIZE)
+        return false;
+
+    iui_draw_cmd *cmd = &ctx->batch.commands[ctx->batch.count++];
+    cmd->type = IUI_CMD_TEXT;
+    cmd->data.text.x = x;
+    cmd->data.text.y = y;
+    /* Truncate text to inline buffer size */
+    size_t len = strlen(text);
+    if (len >= sizeof(cmd->data.text.text))
+        len = sizeof(cmd->data.text.text) - 1;
+    memcpy(cmd->data.text.text, text, len);
+    cmd->data.text.text[len] = '\0';
+    cmd->color = color;
+    cmd->clip = ctx->current_clip;
+    return true;
+}
+
+bool iui_batch_add_line(iui_context *ctx,
+                        float x0,
+                        float y0,
+                        float x1,
+                        float y1,
+                        float width,
+                        uint32_t color)
+{
+    if (!ctx || !ctx->batch.enabled)
+        return false;
+    if (ctx->batch.count >= IUI_DRAW_CMD_BUFFER_SIZE)
+        iui_batch_flush(ctx);
+    if (ctx->batch.count >= IUI_DRAW_CMD_BUFFER_SIZE)
+        return false;
+
+    iui_draw_cmd *cmd = &ctx->batch.commands[ctx->batch.count++];
+    cmd->type = IUI_CMD_LINE;
+    cmd->data.line.x0 = x0;
+    cmd->data.line.y0 = y0;
+    cmd->data.line.x1 = x1;
+    cmd->data.line.y1 = y1;
+    cmd->data.line.width = width;
+    cmd->color = color;
+    cmd->clip = ctx->current_clip;
+    return true;
+}
+
+bool iui_batch_add_circle(iui_context *ctx,
+                          float cx,
+                          float cy,
+                          float radius,
+                          uint32_t fill_color,
+                          uint32_t stroke_color,
+                          float stroke_width)
+{
+    if (!ctx || !ctx->batch.enabled)
+        return false;
+    if (ctx->batch.count >= IUI_DRAW_CMD_BUFFER_SIZE)
+        iui_batch_flush(ctx);
+    if (ctx->batch.count >= IUI_DRAW_CMD_BUFFER_SIZE)
+        return false;
+
+    iui_draw_cmd *cmd = &ctx->batch.commands[ctx->batch.count++];
+    cmd->type = IUI_CMD_CIRCLE;
+    cmd->data.circle.cx = cx;
+    cmd->data.circle.cy = cy;
+    cmd->data.circle.radius = radius;
+    cmd->data.circle.fill_color = fill_color;
+    cmd->data.circle.stroke_width = stroke_width;
+    cmd->color = fill_color;
+    cmd->color2 = stroke_color;
+    cmd->clip = ctx->current_clip;
+    return true;
+}
+
+bool iui_batch_add_arc(iui_context *ctx,
+                       float cx,
+                       float cy,
+                       float radius,
+                       float start_angle,
+                       float end_angle,
+                       float width,
+                       uint32_t color)
+{
+    if (!ctx || !ctx->batch.enabled)
+        return false;
+    if (ctx->batch.count >= IUI_DRAW_CMD_BUFFER_SIZE)
+        iui_batch_flush(ctx);
+    if (ctx->batch.count >= IUI_DRAW_CMD_BUFFER_SIZE)
+        return false;
+
+    iui_draw_cmd *cmd = &ctx->batch.commands[ctx->batch.count++];
+    cmd->type = IUI_CMD_ARC;
+    cmd->data.arc.cx = cx;
+    cmd->data.arc.cy = cy;
+    cmd->data.arc.radius = radius;
+    cmd->data.arc.start_angle = start_angle;
+    cmd->data.arc.end_angle = end_angle;
+    cmd->data.arc.width = width;
+    cmd->color = color;
+    cmd->clip = ctx->current_clip;
+    return true;
+}
+
 /* Text width caching */
 
 void iui_text_cache_init(iui_context *ctx)
@@ -26,14 +221,27 @@ void iui_text_cache_clear(iui_context *ctx)
     memset(ctx->text_cache.entries, 0, sizeof(ctx->text_cache.entries));
 }
 
+/* Mix font_height bits into text hash to prevent cross-size cache poisoning.
+ * Typography paths temporarily mutate ctx->font_height, so same text at
+ * different sizes must hash to different slots.
+ */
+static uint32_t text_cache_hash(const char *text, float font_height)
+{
+    uint32_t h = iui_hash_str(text);
+    uint32_t fh;
+    memcpy(&fh, &font_height, sizeof(fh));
+    h ^= fh * 2654435761u; /* Knuth multiplicative hash mixing */
+    if (h == 0)
+        h = 1;
+    return h;
+}
+
 static bool text_cache_get(iui_context *ctx, const char *text, float *width)
 {
     if (!ctx->text_cache.enabled || !text || !width)
         return false;
 
-    uint32_t hash = iui_hash_str(text);
-    if (hash == 0)
-        hash = 1;
+    uint32_t hash = text_cache_hash(text, ctx->font_height);
 
     /* Bitwise AND for power-of-2 cache size (faster than modulo) */
     int start = hash & (IUI_TEXT_CACHE_SIZE - 1);
@@ -45,8 +253,9 @@ static bool text_cache_get(iui_context *ctx, const char *text, float *width)
             ctx->text_cache.misses++;
             return false;
         }
-        /* Compare both hash and pointer to handle collisions */
-        if (entry->hash == hash && entry->text == text) {
+        /* Compare hash, pointer, and font size to handle collisions */
+        if (entry->hash == hash && entry->text == text &&
+            entry->font_height == ctx->font_height) {
             *width = entry->width;
             if (entry->hits < 255)
                 entry->hits++;
@@ -63,9 +272,7 @@ static void text_cache_put(iui_context *ctx, const char *text, float width)
     if (!ctx->text_cache.enabled || !text)
         return;
 
-    uint32_t hash = iui_hash_str(text);
-    if (hash == 0)
-        hash = 1;
+    uint32_t hash = text_cache_hash(text, ctx->font_height);
 
     /* Bitwise AND for power-of-2 cache size (faster than modulo) */
     int start = hash & (IUI_TEXT_CACHE_SIZE - 1), evict_idx = -1;
@@ -75,10 +282,12 @@ static void text_cache_put(iui_context *ctx, const char *text, float width)
         int idx = (start + i) & (IUI_TEXT_CACHE_SIZE - 1);
         iui_text_cache_entry *entry = &ctx->text_cache.entries[idx];
 
-        /* Empty slot or exact match (same hash and pointer) */
-        if (entry->hash == 0 || (entry->hash == hash && entry->text == text)) {
+        /* Empty slot or exact match (same hash, pointer, and font size) */
+        if (entry->hash == 0 || (entry->hash == hash && entry->text == text &&
+                                 entry->font_height == ctx->font_height)) {
             entry->hash = hash;
             entry->text = text;
+            entry->font_height = ctx->font_height;
             entry->width = width;
             entry->hits = 1;
             return;
@@ -94,6 +303,7 @@ static void text_cache_put(iui_context *ctx, const char *text, float width)
         iui_text_cache_entry *entry = &ctx->text_cache.entries[evict_idx];
         entry->hash = hash;
         entry->text = text;
+        entry->font_height = ctx->font_height;
         entry->width = width;
         entry->hits = 1;
     }
@@ -128,6 +338,9 @@ void iui_text_cache_frame_end(iui_context *ctx)
 /* Text Width and Drawing */
 float iui_get_text_width(iui_context *ctx, const char *text)
 {
+    if (!ctx || !text)
+        return 0.f;
+
     /* Check cache first */
     float cached_width;
     if (text_cache_get(ctx, text, &cached_width))
@@ -187,6 +400,28 @@ void iui_internal_draw_text(iui_context *ctx,
                             const char *text,
                             uint32_t color)
 {
+    /* Track text bounding box in ink-bounds: (x, y) to (x + width, y + h) */
+    if (ctx->ink_bounds.enabled && text && *text) {
+        float tw = iui_get_text_width(ctx, text);
+        iui_ink_bounds_extend(ctx, x, y, tw, ctx->font_height);
+    }
+
+    /* Route through batch to preserve draw order with boxes.
+     * Only batch when the backend has draw_text; vector font rendering
+     * goes through iui_emit_box which is already batch-aware.
+     * Fall back to direct draw for text exceeding inline buffer (64 bytes)
+     * to avoid silent truncation producing different rendering.
+     */
+    if (ctx->batch.enabled && ctx->renderer.draw_text) {
+        if (text && strlen(text) >= 64) {
+            iui_batch_flush(ctx);
+            ctx->renderer.draw_text(x, y, text, color, ctx->renderer.user);
+            return;
+        }
+        iui_batch_add_text(ctx, x, y, text, color);
+        return;
+    }
+
     if (ctx->renderer.draw_text)
         ctx->renderer.draw_text(x, y, text, color, ctx->renderer.user);
     else
@@ -330,8 +565,8 @@ static void iui_divider_internal(iui_context *ctx,
     /* Guard against negative width in narrow containers */
     if (w > 0.f) {
         float x = ctx->layout.x + left_inset;
-        ctx->renderer.draw_box((iui_rect_t) {x, ctx->layout.y, w, 1.f}, 0.f,
-                               ctx->colors.outline_variant, ctx->renderer.user);
+        iui_emit_box(ctx, (iui_rect_t) {x, ctx->layout.y, w, 1.f}, 0.f,
+                     ctx->colors.outline_variant);
     }
 
     /* MD3: 8dp vertical margin below (advance by 1dp line + 8dp margin) */
@@ -363,20 +598,22 @@ void iui_draw_rect_outline(iui_context *ctx,
                            uint32_t color)
 {
     /* Top */
-    ctx->renderer.draw_box((iui_rect_t) {rect.x, rect.y, rect.width, width},
-                           0.f, color, ctx->renderer.user);
+    iui_emit_box(ctx, (iui_rect_t) {rect.x, rect.y, rect.width, width}, 0.f,
+                 color);
     /* Bottom */
-    ctx->renderer.draw_box(
+    iui_emit_box(
+        ctx,
         (iui_rect_t) {rect.x, rect.y + rect.height - width, rect.width, width},
-        0.f, color, ctx->renderer.user);
+        0.f, color);
 
     /* Left */
-    ctx->renderer.draw_box((iui_rect_t) {rect.x, rect.y, width, rect.height},
-                           0.f, color, ctx->renderer.user);
+    iui_emit_box(ctx, (iui_rect_t) {rect.x, rect.y, width, rect.height}, 0.f,
+                 color);
     /* Right */
-    ctx->renderer.draw_box(
+    iui_emit_box(
+        ctx,
         (iui_rect_t) {rect.x + rect.width - width, rect.y, width, rect.height},
-        0.f, color, ctx->renderer.user);
+        0.f, color);
 }
 
 /* Internal: Draw line with fallback to box */
@@ -389,6 +626,15 @@ void iui_draw_line_soft(iui_context *ctx,
                         uint32_t color)
 {
     if (ctx->renderer.draw_line) {
+        /* Conservative AABB: bounding box of endpoints + half-width */
+        float hw = width * 0.5f;
+        iui_ink_bounds_extend(ctx, fminf(x0, x1) - hw, fminf(y0, y1) - hw,
+                              fabsf(x1 - x0) + width, fabsf(y1 - y0) + width);
+        /* Route through batch to preserve draw order with boxes */
+        if (ctx->batch.enabled) {
+            iui_batch_add_line(ctx, x0, y0, x1, y1, width, color);
+            return;
+        }
         ctx->renderer.draw_line(x0, y0, x1, y1, width, color,
                                 ctx->renderer.user);
     } else {
@@ -399,15 +645,15 @@ void iui_draw_line_soft(iui_context *ctx,
 
         /* For simple horizontal/vertical lines, draw_box is perfect */
         if (fabsf(dy) < 0.1f) {
-            ctx->renderer.draw_box(
-                (iui_rect_t) {fminf(x0, x1), y0 - width * 0.5f, fabsf(dx),
-                              width},
-                0.f, color, ctx->renderer.user);
+            iui_emit_box(ctx,
+                         (iui_rect_t) {fminf(x0, x1), y0 - width * 0.5f,
+                                       fabsf(dx), width},
+                         0.f, color);
         } else if (fabsf(dx) < 0.1f) {
-            ctx->renderer.draw_box(
-                (iui_rect_t) {x0 - width * 0.5f, fminf(y0, y1), width,
-                              fabsf(dy)},
-                0.f, color, ctx->renderer.user);
+            iui_emit_box(ctx,
+                         (iui_rect_t) {x0 - width * 0.5f, fminf(y0, y1), width,
+                                       fabsf(dy)},
+                         0.f, color);
         } else {
             /* For diagonal lines without rotation support, approximate with
              * bounding box or thin rects.
@@ -423,16 +669,16 @@ void iui_draw_line_soft(iui_context *ctx,
              */
             if (fabsf(dx) > fabsf(dy)) {
                 float my = (y0 + y1) * 0.5f;
-                ctx->renderer.draw_box(
-                    (iui_rect_t) {fminf(x0, x1), my - width * 0.5f, fabsf(dx),
-                                  width},
-                    0.f, color, ctx->renderer.user);
+                iui_emit_box(ctx,
+                             (iui_rect_t) {fminf(x0, x1), my - width * 0.5f,
+                                           fabsf(dx), width},
+                             0.f, color);
             } else {
                 float mx = (x0 + x1) * 0.5f;
-                ctx->renderer.draw_box(
-                    (iui_rect_t) {mx - width * 0.5f, fminf(y0, y1), width,
-                                  fabsf(dy)},
-                    0.f, color, ctx->renderer.user);
+                iui_emit_box(ctx,
+                             (iui_rect_t) {mx - width * 0.5f, fminf(y0, y1),
+                                           width, fabsf(dy)},
+                             0.f, color);
             }
         }
     }
@@ -448,14 +694,24 @@ void iui_draw_circle_soft(iui_context *ctx,
                           float stroke_width)
 {
     if (ctx->renderer.draw_circle) {
+        float outer = radius + stroke_width;
+        iui_ink_bounds_extend(ctx, cx - outer, cy - outer, outer * 2.f,
+                              outer * 2.f);
+        /* Route through batch to preserve draw order with boxes */
+        if (ctx->batch.enabled) {
+            iui_batch_add_circle(ctx, cx, cy, radius, fill_color, stroke_color,
+                                 stroke_width);
+            return;
+        }
         ctx->renderer.draw_circle(cx, cy, radius, fill_color, stroke_color,
                                   stroke_width, ctx->renderer.user);
     } else {
         /* Fallback: draw box (square) approximating circle */
         if (fill_color) {
-            ctx->renderer.draw_box((iui_rect_t) {cx - radius, cy - radius,
-                                                 radius * 2.f, radius * 2.f},
-                                   radius, fill_color, ctx->renderer.user);
+            iui_emit_box(ctx,
+                         (iui_rect_t) {cx - radius, cy - radius, radius * 2.f,
+                                       radius * 2.f},
+                         radius, fill_color);
         }
         /* If stroked (border), simulate with two boxes or just one filled box
          * with stroke color if no fill. 'draw_box' does not support borders
@@ -466,9 +722,10 @@ void iui_draw_circle_soft(iui_context *ctx,
          */
         if (stroke_color && !fill_color) {
             /* Crude approximation: just draw a filled square for the outline */
-            ctx->renderer.draw_box((iui_rect_t) {cx - radius, cy - radius,
-                                                 radius * 2.f, radius * 2.f},
-                                   radius, stroke_color, ctx->renderer.user);
+            iui_emit_box(ctx,
+                         (iui_rect_t) {cx - radius, cy - radius, radius * 2.f,
+                                       radius * 2.f},
+                         radius, stroke_color);
         }
     }
 }
@@ -484,6 +741,16 @@ void iui_draw_arc_soft(iui_context *ctx,
                        uint32_t color)
 {
     if (ctx->renderer.draw_arc) {
+        /* Conservative: full circle bounding box + arc width */
+        float outer = radius + width * 0.5f;
+        iui_ink_bounds_extend(ctx, cx - outer, cy - outer, outer * 2.f,
+                              outer * 2.f);
+        /* Route through batch to preserve draw order with boxes */
+        if (ctx->batch.enabled) {
+            iui_batch_add_arc(ctx, cx, cy, radius, start_angle, end_angle,
+                              width, color);
+            return;
+        }
         ctx->renderer.draw_arc(cx, cy, radius, start_angle, end_angle, width,
                                color, ctx->renderer.user);
     } else {
@@ -494,9 +761,10 @@ void iui_draw_arc_soft(iui_context *ctx,
          * Simplified: just draw a small box at the center to indicate something
          * is there
          */
-        ctx->renderer.draw_box(
+        iui_emit_box(
+            ctx,
             (iui_rect_t) {cx - radius, cy - radius, radius * 2.f, radius * 2.f},
-            radius, color, ctx->renderer.user);
+            radius, color);
     }
 }
 
@@ -522,6 +790,13 @@ bool iui_draw_line(iui_context *ctx,
 {
     if (!ctx || !ctx->renderer.draw_line)
         return false;
+    float hw = width * 0.5f;
+    iui_ink_bounds_extend(ctx, fminf(x0, x1) - hw, fminf(y0, y1) - hw,
+                          fabsf(x1 - x0) + width, fabsf(y1 - y0) + width);
+    if (ctx->batch.enabled) {
+        iui_batch_add_line(ctx, x0, y0, x1, y1, width, color);
+        return true;
+    }
     ctx->renderer.draw_line(x0, y0, x1, y1, width, color, ctx->renderer.user);
     return true;
 }
@@ -536,6 +811,14 @@ bool iui_draw_circle(iui_context *ctx,
 {
     if (!ctx || !ctx->renderer.draw_circle)
         return false;
+    float outer = radius + stroke_width;
+    iui_ink_bounds_extend(ctx, cx - outer, cy - outer, outer * 2.f,
+                          outer * 2.f);
+    if (ctx->batch.enabled) {
+        iui_batch_add_circle(ctx, cx, cy, radius, fill_color, stroke_color,
+                             stroke_width);
+        return true;
+    }
     ctx->renderer.draw_circle(cx, cy, radius, fill_color, stroke_color,
                               stroke_width, ctx->renderer.user);
     return true;
@@ -552,6 +835,14 @@ bool iui_draw_arc(iui_context *ctx,
 {
     if (!ctx || !ctx->renderer.draw_arc)
         return false;
+    float outer = radius + width * 0.5f;
+    iui_ink_bounds_extend(ctx, cx - outer, cy - outer, outer * 2.f,
+                          outer * 2.f);
+    if (ctx->batch.enabled) {
+        iui_batch_add_arc(ctx, cx, cy, radius, start_angle, end_angle, width,
+                          color);
+        return true;
+    }
     ctx->renderer.draw_arc(cx, cy, radius, start_angle, end_angle, width, color,
                            ctx->renderer.user);
     return true;
@@ -635,8 +926,7 @@ void iui_draw_state_layer(iui_context *ctx,
     uint32_t layer_color = iui_state_layer(content_color, alpha);
 
     /* Draw the state layer overlay */
-    ctx->renderer.draw_box(bounds, corner_radius, layer_color,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, bounds, corner_radius, layer_color);
 }
 
 /* MD3 Elevation Shadow System
@@ -728,8 +1018,7 @@ void iui_draw_shadow(iui_context *ctx,
             .height = bounds.height + spread * 2.f,
         };
 
-        ctx->renderer.draw_box(rect, corner_radius + spread * 0.5f, color,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, rect, corner_radius + spread * 0.5f, color);
     }
 
     /* Render key shadow (directional, offset down)
@@ -756,8 +1045,7 @@ void iui_draw_shadow(iui_context *ctx,
             .height = bounds.height + spread,
         };
 
-        ctx->renderer.draw_box(rect, corner_radius + spread * 0.3f, color,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, rect, corner_radius + spread * 0.3f, color);
     }
 }
 
@@ -794,7 +1082,7 @@ void iui_draw_elevated_box(iui_context *ctx,
 #endif
 
     /* Draw the box on top */
-    ctx->renderer.draw_box(bounds, corner_radius, color, ctx->renderer.user);
+    iui_emit_box(ctx, bounds, corner_radius, color);
 }
 
 /* Clip stack functions */
@@ -807,7 +1095,8 @@ bool iui_push_clip(iui_context *ctx, iui_rect_t rect)
     if (ctx->clip.depth > 0) {
         iui_rect_t current = ctx->clip.stack[ctx->clip.depth - 1];
         /* Compute right/bottom BEFORE clamping origin so the original
-         * rect.x + rect.width is used, not the shifted value. */
+         * rect.x + rect.width is used, not the shifted value.
+         */
         float right = fminf(rect.x + rect.width, current.x + current.width);
         float bottom = fminf(rect.y + rect.height, current.y + current.height);
         rect.x = fmaxf(rect.x, current.x);
@@ -941,6 +1230,14 @@ static void batch_flush_internal(iui_context *ctx)
         }
     }
     ctx->batch.count = 0;
+
+    /* Restore the logical clip state so subsequent direct draws (e.g. long-text
+     * fallback) use the correct clip rectangle, not whatever the last batched
+     * command happened to set.
+     */
+    ctx->renderer.set_clip_rect(ctx->current_clip.minx, ctx->current_clip.miny,
+                                ctx->current_clip.maxx, ctx->current_clip.maxy,
+                                ctx->renderer.user);
 }
 
 void iui_batch_init(iui_context *ctx)

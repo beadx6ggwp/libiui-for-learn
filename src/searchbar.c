@@ -120,9 +120,8 @@ iui_search_bar_result iui_search_bar_ex(iui_context *ctx,
     /* Draw container background (surface_container_high with full round
      * corners)
      */
-    ctx->renderer.draw_box(bar_rect, corner_radius,
-                           ctx->colors.surface_container_high,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, bar_rect, corner_radius,
+                 ctx->colors.surface_container_high);
 
     /* Draw state layer for hover/press */
     iui_draw_state_layer(ctx, bar_rect, corner_radius, ctx->colors.on_surface,
@@ -174,8 +173,7 @@ iui_search_bar_result iui_search_bar_ex(iui_context *ctx,
 
             iui_rect_t cursor_rect = {
                 cursor_x, cursor_y, IUI_TEXTFIELD_CURSOR_WIDTH, cursor_height};
-            ctx->renderer.draw_box(cursor_rect, 0.f, ctx->colors.primary,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, cursor_rect, 0.f, ctx->colors.primary);
         }
     }
 
@@ -197,8 +195,7 @@ iui_search_bar_result iui_search_bar_ex(iui_context *ctx,
             iui_rect_t trail_layer_rect = {trailing_icon_x - icon_size * 0.5f,
                                            icon_cy - icon_size * 0.5f,
                                            icon_size, icon_size};
-            ctx->renderer.draw_box(trail_layer_rect, icon_size * 0.5f,
-                                   layer_color, ctx->renderer.user);
+            iui_emit_box(ctx, trail_layer_rect, icon_size * 0.5f, layer_color);
         }
 
         iui_draw_fab_icon(ctx, trailing_icon_x, icon_cy, icon_size, trail_icon,
@@ -300,8 +297,7 @@ bool iui_search_view_begin(iui_context *ctx,
     iui_register_blocking_region(ctx, screen_bounds);
 
     /* Draw full-screen surface background */
-    ctx->renderer.draw_box(screen_bounds, 0.f, ctx->colors.surface,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, screen_bounds, 0.f, ctx->colors.surface);
 
     /* Header dimensions */
     float header_h = IUI_SEARCH_VIEW_HEADER_HEIGHT;
@@ -346,9 +342,7 @@ bool iui_search_view_begin(iui_context *ctx,
 
     /* Draw search field background */
     float corner = IUI_SEARCH_BAR_CORNER_RADIUS;
-    ctx->renderer.draw_box(field_rect, corner,
-                           ctx->colors.surface_container_high,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, field_rect, corner, ctx->colors.surface_container_high);
 
     /* Auto-focus the search field and register for tracking */
     ctx->focused_edit = search->query;
@@ -390,8 +384,7 @@ bool iui_search_view_begin(iui_context *ctx,
         float cursor_x = text_x + iui_get_text_width(ctx, temp);
         iui_rect_t cursor_rect = {cursor_x, text_y, IUI_TEXTFIELD_CURSOR_WIDTH,
                                   ctx->font_height};
-        ctx->renderer.draw_box(cursor_rect, 0.f, ctx->colors.primary,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, cursor_rect, 0.f, ctx->colors.primary);
     }
 
     /* Draw clear button if text present */

@@ -542,13 +542,15 @@ static void iui_emit_glyph(iui_context *ctx,
                     float mx = (x + nx) * 0.5f, my = (y + ny) * 0.5f;
                     float w = fmaxf(len, 1.f), h = fmaxf(pen_w, 1.f);
                     if (fabsf(dx) > fabsf(dy))
-                        ctx->renderer.draw_box(
+                        iui_emit_box(
+                            ctx,
                             (iui_rect_t) {fminf(x, nx), my - h * 0.5f, w, h}, 0,
-                            color, ctx->renderer.user);
+                            color);
                     else
-                        ctx->renderer.draw_box(
+                        iui_emit_box(
+                            ctx,
                             (iui_rect_t) {mx - h * 0.5f, fminf(y, ny), h, len},
-                            0, color, ctx->renderer.user);
+                            0, color);
                 }
             }
             x = nx, y = ny;
@@ -592,15 +594,17 @@ static void iui_emit_glyph(iui_context *ctx,
                     if (len > 0.5f) {
                         float w = fmaxf(len, 1.f), h = fmaxf(pen_w, 1.f);
                         if (fabsf(dx) > fabsf(dy))
-                            ctx->renderer.draw_box(
+                            iui_emit_box(
+                                ctx,
                                 (iui_rect_t) {fminf(x, nx),
                                               (y + ny) * 0.5f - h * 0.5f, w, h},
-                                0, color, ctx->renderer.user);
+                                0, color);
                         else
-                            ctx->renderer.draw_box(
+                            iui_emit_box(
+                                ctx,
                                 (iui_rect_t) {(x + nx) * 0.5f - h * 0.5f,
                                               fminf(y, ny), h, len},
-                                0, color, ctx->renderer.user);
+                                0, color);
                     }
                     x = nx;
                     y = ny;
@@ -804,6 +808,7 @@ iui_context *iui_init(const iui_config_t *config)
     /* Initialize performance systems (disabled by default) */
     iui_batch_init(ctx);
     iui_dirty_init(ctx);
+    iui_ink_bounds_init(ctx);
     iui_text_cache_init(ctx);
     return ctx;
 }
@@ -998,7 +1003,7 @@ void iui_draw_focus_ring(iui_context *ctx,
     uint32_t ring_color = ctx->colors.primary;
 
     /* Draw outer ring (full box) */
-    ctx->renderer.draw_box(ring, outer_corner, ring_color, ctx->renderer.user);
+    iui_emit_box(ctx, ring, outer_corner, ring_color);
 
     /* Draw inner cutout with surface color to create ring effect */
     iui_rect_t inner = {
@@ -1010,8 +1015,7 @@ void iui_draw_focus_ring(iui_context *ctx,
     float inner_corner = corner_radius + offset;
 
     /* Use surface color to "cut out" the inner area */
-    ctx->renderer.draw_box(inner, inner_corner, ctx->colors.surface,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, inner, inner_corner, ctx->colors.surface);
 }
 #else
 /* Stub: Focus ring disabled - draw nothing */
