@@ -63,6 +63,10 @@
 #define IUI_TEXT_CACHE_DECAY_COUNT 4 /* entries to age per frame */
 #endif
 
+/* Text cache uses (size - 1) bitmask for indexing; must be power of two */
+_Static_assert((IUI_TEXT_CACHE_SIZE & (IUI_TEXT_CACHE_SIZE - 1)) == 0,
+               "IUI_TEXT_CACHE_SIZE must be a power of two");
+
 /* Per-frame field tracking constants */
 #ifndef IUI_MAX_TRACKED_TEXTFIELDS
 #define IUI_MAX_TRACKED_TEXTFIELDS 32 /* max text fields per frame */
@@ -353,12 +357,24 @@ typedef struct {
     bool enabled;
 } iui_dirty_state;
 
+/* Per-frame ink-bounds tracking: union bounding box of all draw calls.
+ * Backend can use this to blit only the drawn region instead of the full
+ * framebuffer. Reset each frame in iui_begin_frame().
+ */
+typedef struct {
+    float min_x, min_y, max_x, max_y;
+    bool valid; /* false = no draw calls this frame */
+    bool enabled;
+} iui_ink_bounds_t;
+
 /* Text width cache entry */
 typedef struct {
-    uint32_t hash;    /* 0 = empty slot */
-    const char *text; /* pointer for collision detection */
-    float width;      /* cached width */
-    uint8_t hits;     /* usage counter for eviction */
+    uint32_t hash;     /* 0 = empty slot */
+    const char *text;  /* pointer for collision detection */
+    float font_height; /* font size at cache time (prevents cross-size
+                          poisoning) */
+    float width;       /* cached width */
+    uint8_t hits;      /* usage counter for eviction */
 } iui_text_cache_entry;
 
 /* Text width cache state */
@@ -501,6 +517,7 @@ struct iui_context {
 
     /* PERFORMANCE SYSTEMS - Optimization Caches */
     iui_dirty_state dirty;
+    iui_ink_bounds_t ink_bounds;
     iui_text_cache_state text_cache;
     iui_draw_batch batch;
     iui_field_tracking field_tracking;
@@ -1147,6 +1164,79 @@ bool iui_batch_add_arc(iui_context *ctx,
                        float end_angle,
                        float width,
                        uint32_t color);
+
+/* Ink-bounds tracking - internal functions (draw.c)
+ * Tracks the union bounding box of all draw calls within a frame.
+ * Note: iui_ink_bounds_enable/get/valid are public in iui.h
+ */
+void iui_ink_bounds_init(iui_context *ctx);
+void iui_ink_bounds_reset(iui_context *ctx);
+
+/* Internal draw emission: updates ink-bounds and routes through batch when
+ * enabled. All internal code should call iui_emit_box() instead of
+ * ctx->renderer.draw_box() directly.
+ *
+ * Branchless accumulation: reset initializes bounds to FLT_MAX/-FLT_MAX
+ * so the first extend unconditionally wins all comparisons. Eliminates the
+ * per-call 'valid' branch on Arm Cortex-M pipeline.
+ */
+static inline void iui_ink_bounds_extend(iui_context *ctx,
+                                         float x,
+                                         float y,
+                                         float w,
+                                         float h)
+{
+    if (!ctx->ink_bounds.enabled)
+        return;
+
+    /* Reject NaN/Inf early: NaN silently fails all comparisons (leaving bounds
+     * untouched) and Inf corrupts the bounding box geometry. isfinite() is C99
+     * <math.h>, typically a compiler builtin on ARM.
+     */
+    if (!isfinite(x) || !isfinite(y) || !isfinite(w) || !isfinite(h))
+        return;
+
+    float x1 = x + w, y1 = y + h;
+
+    /* Normalize: handle negative width/height */
+    if (w < 0) {
+        float t = x;
+        x = x1;
+        x1 = t;
+    }
+    if (h < 0) {
+        float t = y;
+        y = y1;
+        y1 = t;
+    }
+
+    if (x < ctx->ink_bounds.min_x)
+        ctx->ink_bounds.min_x = x;
+    if (y < ctx->ink_bounds.min_y)
+        ctx->ink_bounds.min_y = y;
+    if (x1 > ctx->ink_bounds.max_x)
+        ctx->ink_bounds.max_x = x1;
+    if (y1 > ctx->ink_bounds.max_y)
+        ctx->ink_bounds.max_y = y1;
+    ctx->ink_bounds.valid = true;
+}
+
+/* Universal draw emission: updates ink-bounds then routes to batch or
+ * direct renderer.  All internal code should call iui_emit_box() instead
+ * of ctx->renderer.draw_box() directly.
+ */
+static inline void iui_emit_box(iui_context *ctx,
+                                iui_rect_t rect,
+                                float radius,
+                                uint32_t color)
+{
+    iui_ink_bounds_extend(ctx, rect.x, rect.y, rect.width, rect.height);
+    if (ctx->batch.enabled)
+        iui_batch_add_rect(ctx, rect.x, rect.y, rect.width, rect.height, radius,
+                           color);
+    else
+        ctx->renderer.draw_box(rect, radius, color, ctx->renderer.user);
+}
 
 /* Dirty rectangle tracking - internal functions (layout.c)
  * Note: iui_dirty_enable/mark/invalidate_all/check/count are public in iui.h

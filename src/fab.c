@@ -55,8 +55,7 @@ static bool iui_fab_internal(iui_context *ctx,
     iui_draw_shadow(ctx, fab_rect, corner_radius, IUI_ELEVATION_3);
 
     /* Draw container background */
-    ctx->renderer.draw_box(fab_rect, corner_radius, container_color,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, fab_rect, corner_radius, container_color);
 
     /* Draw state layer for hover/press */
     iui_draw_state_layer(ctx, fab_rect, corner_radius, content_color, state);
@@ -247,8 +246,7 @@ static bool iui_icon_button_internal(iui_context *ctx,
 
     /* Draw container background (if applicable) */
     if (draw_container) {
-        ctx->renderer.draw_box(button_rect, corner_radius, container_color,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, button_rect, corner_radius, container_color);
     }
 
     /* Draw outline (for outlined variant) */

@@ -113,10 +113,11 @@ static void draw_leading_element(iui_context *ctx,
 
     case IUI_LIST_LEADING_IMAGE:
         /* Draw square image placeholder */
-        ctx->renderer.draw_box(
+        iui_emit_box(
+            ctx,
             (iui_rect_t) {x, cy - IUI_LIST_ONE_LINE_HEIGHT * 0.5f,
                           IUI_LIST_ONE_LINE_HEIGHT, IUI_LIST_ONE_LINE_HEIGHT},
-            4.f, ctx->colors.surface_container_high, ctx->renderer.user);
+            4.f, ctx->colors.surface_container_high);
         break;
 
     default:
@@ -197,8 +198,7 @@ static void draw_trailing_element(iui_context *ctx,
             uint32_t track_color = *item->checkbox_value
                                        ? ctx->colors.primary
                                        : ctx->colors.surface_container_highest;
-            ctx->renderer.draw_box(switch_rect, switch_h * 0.5f, track_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, switch_rect, switch_h * 0.5f, track_color);
 
             /* Draw thumb */
             float thumb_x = *item->checkbox_value
@@ -360,9 +360,8 @@ bool iui_list_item_ex(iui_context *ctx,
         float divider_x = text_x;
         float divider_y = item_y + item_height - 1.f;
         float divider_w = item_width - (text_x - item_x) - IUI_LIST_PADDING_H;
-        ctx->renderer.draw_box(
-            (iui_rect_t) {divider_x, divider_y, divider_w, 1.f}, 0.f,
-            ctx->colors.outline_variant, ctx->renderer.user);
+        iui_emit_box(ctx, (iui_rect_t) {divider_x, divider_y, divider_w, 1.f},
+                     0.f, ctx->colors.outline_variant);
     }
 
     /* Advance layout */
@@ -425,9 +424,8 @@ void iui_list_divider(iui_context *ctx)
     float divider_y = ctx->layout.y;
     float divider_w = ctx->layout.width - IUI_LIST_DIVIDER_INSET;
 
-    ctx->renderer.draw_box((iui_rect_t) {divider_x, divider_y, divider_w, 1.f},
-                           0.f, ctx->colors.outline_variant,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, (iui_rect_t) {divider_x, divider_y, divider_w, 1.f}, 0.f,
+                 ctx->colors.outline_variant);
 
     /* Add small vertical spacing */
     ctx->layout.y += 1.f;

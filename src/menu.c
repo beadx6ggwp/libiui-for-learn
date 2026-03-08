@@ -82,8 +82,7 @@ bool iui_menu_begin(iui_context *ctx,
     iui_draw_shadow(ctx, bg_rect, corner, IUI_ELEVATION_3);
 
     /* Draw menu background */
-    ctx->renderer.draw_box(bg_rect, corner, ctx->colors.surface_container,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, bg_rect, corner, ctx->colors.surface_container);
 
     /* Track component for MD3 validation */
     IUI_MD3_TRACK_MENU(bg_rect, corner);
@@ -118,10 +117,10 @@ bool iui_menu_add_item(iui_context *ctx,
     if (item->is_divider) {
         float div_y = menu->y + menu->height, div_h = IUI_MENU_DIVIDER_HEIGHT;
         float line_y = div_y + div_h * 0.5f;
-        ctx->renderer.draw_box(
-            (iui_rect_t) {menu->x + IUI_MENU_PADDING_H, line_y - 0.5f,
-                          menu->width - IUI_MENU_PADDING_H * 2.f, 1.f},
-            0.f, ctx->colors.outline_variant, ctx->renderer.user);
+        iui_emit_box(ctx,
+                     (iui_rect_t) {menu->x + IUI_MENU_PADDING_H, line_y - 0.5f,
+                                   menu->width - IUI_MENU_PADDING_H * 2.f, 1.f},
+                     0.f, ctx->colors.outline_variant);
 
         menu->height += div_h;
         return false; /* Dividers are not clickable */

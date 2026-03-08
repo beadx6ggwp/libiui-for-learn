@@ -511,6 +511,9 @@ void iui_begin_frame(iui_context *ctx, float delta_time)
 
     /* Reset batch command buffer for new frame */
     ctx->batch.count = 0;
+
+    /* Reset ink-bounds for new frame */
+    iui_ink_bounds_reset(ctx);
 }
 
 bool iui_begin_window(iui_context *ctx,
@@ -619,13 +622,12 @@ bool iui_begin_window(iui_context *ctx,
 
     /* MD3 Card/Dialog: unified surface_container_high background with outline
      */
-    ctx->renderer.draw_box(
-        (iui_rect_t) {w->pos.x, w->pos.y, w->width, w->height}, ctx->corner,
-        ctx->colors.outline_variant, ctx->renderer.user);
-    ctx->renderer.draw_box((iui_rect_t) {w->pos.x + 1.f, w->pos.y + 1.f,
-                                         w->width - 2.f, w->height - 2.f},
-                           ctx->corner, ctx->colors.surface_container_high,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, (iui_rect_t) {w->pos.x, w->pos.y, w->width, w->height},
+                 ctx->corner, ctx->colors.outline_variant);
+    iui_emit_box(ctx,
+                 (iui_rect_t) {w->pos.x + 1.f, w->pos.y + 1.f, w->width - 2.f,
+                               w->height - 2.f},
+                 ctx->corner, ctx->colors.surface_container_high);
 
     ctx->layout = (iui_rect_t) {
         .x = w->pos.x + ctx->padding,
@@ -643,8 +645,7 @@ bool iui_begin_window(iui_context *ctx,
 
     /* draw resize handle */
     if (w->options & IUI_WINDOW_RESIZABLE)
-        ctx->renderer.draw_box(handle_rect, 0.f, ctx->colors.outline_variant,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, handle_rect, 0.f, ctx->colors.outline_variant);
 
     /* Push window content clip so nested clips (scroll, banners) intersect
      * with window bounds instead of escaping when depth == 0. */

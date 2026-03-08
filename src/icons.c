@@ -99,9 +99,8 @@ static void iui_draw_icon_error(iui_context *ctx,
     float dot_r = size * 0.08f;
 
     /* Vertical bar */
-    ctx->renderer.draw_box(
-        (iui_rect_t) {cx - 1.5f, cy - bar_h, 3.f, bar_h * 1.4f}, 1.f, color,
-        ctx->renderer.user);
+    iui_emit_box(ctx, (iui_rect_t) {cx - 1.5f, cy - bar_h, 3.f, bar_h * 1.4f},
+                 1.f, color);
 
     /* Dot below */
     iui_draw_circle_soft(ctx, cx, cy + bar_h * 0.6f, dot_r, color, 0, 0);

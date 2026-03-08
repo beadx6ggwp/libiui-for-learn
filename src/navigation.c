@@ -27,8 +27,7 @@ void iui_nav_rail_begin(iui_context *ctx,
 
     /* Draw rail background */
     iui_rect_t rail_rect = {x, y, width, height};
-    ctx->renderer.draw_box(rail_rect, 0.f, ctx->colors.surface,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, rail_rect, 0.f, ctx->colors.surface);
 
     /* Track component for MD3 validation */
     IUI_MD3_TRACK_NAV_RAIL(rail_rect, 0.f);
@@ -55,8 +54,7 @@ bool iui_nav_rail_fab(iui_context *ctx,
 
     /* Draw FAB background */
     uint32_t fab_bg = ctx->colors.primary_container;
-    ctx->renderer.draw_box(fab_rect, IUI_FAB_CORNER_RADIUS, fab_bg,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, fab_rect, IUI_FAB_CORNER_RADIUS, fab_bg);
 
     /* Draw state layer for hover/press */
     iui_draw_state_layer(ctx, fab_rect, IUI_FAB_CORNER_RADIUS,
@@ -118,18 +116,16 @@ bool iui_nav_rail_item(iui_context *ctx,
             float indicator_w = IUI_NAV_RAIL_WIDTH + text_width;
             iui_rect_t indicator_rect = {indicator_x, indicator_y, indicator_w,
                                          IUI_NAV_RAIL_INDICATOR_HEIGHT};
-            ctx->renderer.draw_box(indicator_rect, IUI_NAV_RAIL_CORNER_RADIUS,
-                                   ctx->colors.secondary_container,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, indicator_rect, IUI_NAV_RAIL_CORNER_RADIUS,
+                         ctx->colors.secondary_container);
             IUI_MD3_TRACK_NAV_RAIL_INDICATOR(indicator_rect,
                                              IUI_NAV_RAIL_CORNER_RADIUS);
         } else {
             iui_rect_t indicator_rect = {indicator_x, indicator_y,
                                          IUI_NAV_RAIL_INDICATOR_WIDTH,
                                          IUI_NAV_RAIL_INDICATOR_HEIGHT};
-            ctx->renderer.draw_box(indicator_rect, IUI_NAV_RAIL_CORNER_RADIUS,
-                                   ctx->colors.secondary_container,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, indicator_rect, IUI_NAV_RAIL_CORNER_RADIUS,
+                         ctx->colors.secondary_container);
             IUI_MD3_TRACK_NAV_RAIL_INDICATOR(indicator_rect,
                                              IUI_NAV_RAIL_CORNER_RADIUS);
         }
@@ -144,8 +140,7 @@ bool iui_nav_rail_item(iui_context *ctx,
         iui_rect_t hover_rect = {indicator_x, indicator_y,
                                  IUI_NAV_RAIL_INDICATOR_WIDTH,
                                  IUI_NAV_RAIL_INDICATOR_HEIGHT};
-        ctx->renderer.draw_box(hover_rect, IUI_NAV_RAIL_CORNER_RADIUS,
-                               layer_color, ctx->renderer.user);
+        iui_emit_box(ctx, hover_rect, IUI_NAV_RAIL_CORNER_RADIUS, layer_color);
     }
 
     /* Draw icon — centered inside the indicator */
@@ -222,8 +217,7 @@ void iui_nav_bar_begin(iui_context *ctx,
 
     /* Draw bar background */
     iui_rect_t bar_rect = {x, y, width, IUI_NAV_BAR_HEIGHT};
-    ctx->renderer.draw_box(bar_rect, 0.f, ctx->colors.surface_container,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, bar_rect, 0.f, ctx->colors.surface_container);
 
     /* Track component for MD3 validation */
     IUI_MD3_TRACK_NAV_BAR(bar_rect, 0.f);
@@ -266,9 +260,8 @@ bool iui_nav_bar_item(iui_context *ctx,
         iui_rect_t indicator_rect = {indicator_x, indicator_y,
                                      IUI_NAV_BAR_INDICATOR_WIDTH,
                                      IUI_NAV_BAR_INDICATOR_HEIGHT};
-        ctx->renderer.draw_box(
-            indicator_rect, IUI_NAV_BAR_INDICATOR_HEIGHT * 0.5f,
-            ctx->colors.secondary_container, ctx->renderer.user);
+        iui_emit_box(ctx, indicator_rect, IUI_NAV_BAR_INDICATOR_HEIGHT * 0.5f,
+                     ctx->colors.secondary_container);
     }
 
     /* Draw state layer on hover/press */
@@ -280,8 +273,8 @@ bool iui_nav_bar_item(iui_context *ctx,
         iui_rect_t hover_rect = {indicator_x, indicator_y,
                                  IUI_NAV_BAR_INDICATOR_WIDTH,
                                  IUI_NAV_BAR_INDICATOR_HEIGHT};
-        ctx->renderer.draw_box(hover_rect, IUI_NAV_BAR_INDICATOR_HEIGHT * 0.5f,
-                               layer_color, ctx->renderer.user);
+        iui_emit_box(ctx, hover_rect, IUI_NAV_BAR_INDICATOR_HEIGHT * 0.5f,
+                     layer_color);
     }
 
     /* Draw icon */
@@ -372,10 +365,8 @@ bool iui_nav_drawer_begin(iui_context *ctx,
         iui_rect_t screen_rect = {0, 0, 10000.f, height};
         uint8_t scrim_alpha =
             (uint8_t) (IUI_SCRIM_ALPHA * state->anim_progress);
-        ctx->renderer.draw_box(
-            screen_rect, 0.f,
-            (scrim_alpha << 24) | (ctx->colors.scrim & 0x00FFFFFF),
-            ctx->renderer.user);
+        iui_emit_box(ctx, screen_rect, 0.f,
+                     (scrim_alpha << 24) | (ctx->colors.scrim & 0x00FFFFFF));
 
         /* Push modal layer for input blocking */
         iui_push_layer(ctx, 100);
@@ -389,8 +380,7 @@ bool iui_nav_drawer_begin(iui_context *ctx,
 
     /* Draw drawer background */
     iui_rect_t drawer_rect = {animated_x, y, drawer_width, height};
-    ctx->renderer.draw_box(drawer_rect, 0.f, ctx->colors.surface,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, drawer_rect, 0.f, ctx->colors.surface);
 
     /* Track component for MD3 validation */
     IUI_MD3_TRACK_NAV_DRAWER(drawer_rect, 0.f);
@@ -429,13 +419,11 @@ bool iui_nav_drawer_item(iui_context *ctx,
 
     /* Draw selection or hover background */
     if (selected) {
-        ctx->renderer.draw_box(item_rect, 28.f, ctx->colors.secondary_container,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, item_rect, 28.f, ctx->colors.secondary_container);
     } else if (iui_state_is_interactive(comp_state)) {
         uint32_t layer_color = iui_state_layer(ctx->colors.on_surface,
                                                iui_state_get_alpha(comp_state));
-        ctx->renderer.draw_box(item_rect, 28.f, layer_color,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, item_rect, 28.f, layer_color);
     }
 
     /* Draw icon */
@@ -480,8 +468,8 @@ void iui_nav_drawer_divider(iui_context *ctx)
     ctx->layout.y += 8.f;
     float x = ctx->layout.x + IUI_NAV_DRAWER_PADDING_H;
     float w = IUI_NAV_DRAWER_WIDTH - 2 * IUI_NAV_DRAWER_PADDING_H;
-    ctx->renderer.draw_box((iui_rect_t) {x, ctx->layout.y, w, 1.f}, 0.f,
-                           ctx->colors.outline_variant, ctx->renderer.user);
+    iui_emit_box(ctx, (iui_rect_t) {x, ctx->layout.y, w, 1.f}, 0.f,
+                 ctx->colors.outline_variant);
     ctx->layout.y += 1.f + 8.f;
 }
 
@@ -518,8 +506,7 @@ void iui_bottom_app_bar_begin(iui_context *ctx,
 
     /* Draw bar background */
     iui_rect_t bar_rect = {x, y, width, IUI_BOTTOM_APP_BAR_HEIGHT};
-    ctx->renderer.draw_box(bar_rect, 0.f, ctx->colors.surface_container,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, bar_rect, 0.f, ctx->colors.surface_container);
 
     /* Track component for MD3 validation */
     IUI_MD3_TRACK_BOTTOM_APP_BAR(bar_rect, 0.f);
@@ -600,8 +587,7 @@ bool iui_bottom_app_bar_fab(iui_context *ctx,
     iui_state_t comp_state = iui_get_component_state(ctx, fab_rect, false);
 
     /* Draw FAB background */
-    ctx->renderer.draw_box(fab_rect, corner_radius,
-                           ctx->colors.primary_container, ctx->renderer.user);
+    iui_emit_box(ctx, fab_rect, corner_radius, ctx->colors.primary_container);
 
     /* Draw state layer for hover/press */
     iui_draw_state_layer(ctx, fab_rect, corner_radius,
@@ -702,8 +688,7 @@ bool iui_side_sheet_begin(iui_context *ctx,
             (uint8_t) (IUI_SCRIM_ALPHA * state->anim_progress);
         uint32_t scrim_color =
             (scrim_alpha << 24) | (ctx->colors.scrim & 0x00FFFFFF);
-        ctx->renderer.draw_box(screen_rect, 0.f, scrim_color,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, screen_rect, 0.f, scrim_color);
 
         /* Close on scrim click (protect against opening click release using
          * frames_since_open, similar to iui_modal_should_close) */
@@ -725,8 +710,7 @@ bool iui_side_sheet_begin(iui_context *ctx,
     /* Draw left border for standard sheets (outline variant) */
     if (!state->modal) {
         iui_rect_t border_rect = {animated_x - 1.f, 0, 1.f, sheet_height};
-        ctx->renderer.draw_box(border_rect, 0.f, ctx->colors.outline_variant,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, border_rect, 0.f, ctx->colors.outline_variant);
     }
 
     iui_draw_elevated_box(ctx, sheet_rect, 0.f, elevation,

@@ -90,9 +90,9 @@ void iui_progress_linear(iui_context *ctx,
     };
 
     /* Draw background track */
-    ctx->renderer.draw_box(bar_rect,
-                           bar_rect.height * 0.5f, /* Pill-shaped corners */
-                           ctx->colors.surface_container, ctx->renderer.user);
+    iui_emit_box(ctx, bar_rect,
+                 bar_rect.height * 0.5f, /* Pill-shaped corners */
+                 ctx->colors.surface_container);
 
     /* Draw progress indicator */
     float progress_ratio =
@@ -113,19 +113,19 @@ void iui_progress_linear(iui_context *ctx,
             float draw_x = fmaxf(anim_x, bar_rect.x);
             float draw_width =
                 fminf(anim_x + bar_width, bar_rect.x + bar_rect.width) - draw_x;
-            ctx->renderer.draw_box(
+            iui_emit_box(
+                ctx,
                 (iui_rect_t) {draw_x, bar_rect.y, draw_width, bar_rect.height},
-                bar_rect.height * 0.5f, ctx->colors.primary,
-                ctx->renderer.user);
+                bar_rect.height * 0.5f, ctx->colors.primary);
         }
     } else {
         /* Draw determinate progress */
         if (filled_width > 0) {
-            ctx->renderer.draw_box(
-                (iui_rect_t) {bar_rect.x, bar_rect.y, filled_width,
-                              bar_rect.height},
-                bar_rect.height * 0.5f, /* Pill-shaped corners */
-                ctx->colors.primary, ctx->renderer.user);
+            iui_emit_box(ctx,
+                         (iui_rect_t) {bar_rect.x, bar_rect.y, filled_width,
+                                       bar_rect.height},
+                         bar_rect.height * 0.5f, /* Pill-shaped corners */
+                         ctx->colors.primary);
         }
     }
 
@@ -250,8 +250,7 @@ bool iui_snackbar(iui_context *ctx,
     /* Draw snackbar background using inverse colors for contrast */
     iui_rect_t bar_rect = {snackbar_x, snackbar_y, snackbar_width,
                            snackbar_height};
-    ctx->renderer.draw_box(bar_rect, corner_radius, ctx->colors.inverse_surface,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, bar_rect, corner_radius, ctx->colors.inverse_surface);
 
     /* Track component for MD3 validation */
     IUI_MD3_TRACK_SNACKBAR(bar_rect, corner_radius);
@@ -284,8 +283,7 @@ bool iui_snackbar(iui_context *ctx,
                 pressed ? IUI_STATE_PRESS_ALPHA : IUI_STATE_HOVER_ALPHA;
             uint32_t layer_color =
                 iui_state_layer(ctx->colors.inverse_primary, alpha);
-            ctx->renderer.draw_box(action_rect, corner_radius, layer_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, action_rect, corner_radius, layer_color);
         }
 
         /* Draw action text */
@@ -469,9 +467,8 @@ bool iui_scroll_end(iui_context *ctx, iui_scroll_state *state)
             thumb_rect.y = thumb_y;
         }
 
-        ctx->renderer.draw_box(track_rect, scrollbar_width * 0.5f,
-                               ctx->colors.surface_container_high,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, track_rect, scrollbar_width * 0.5f,
+                     ctx->colors.surface_container_high);
 
         uint32_t thumb_color = ctx->colors.outline;
         if (is_dragging) {
@@ -479,8 +476,7 @@ bool iui_scroll_end(iui_context *ctx, iui_scroll_state *state)
         } else if (in_rect(&thumb_rect, ctx->mouse_pos)) {
             thumb_color = ctx->colors.on_surface_variant;
         }
-        ctx->renderer.draw_box(thumb_rect, scrollbar_width * 0.5f, thumb_color,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, thumb_rect, scrollbar_width * 0.5f, thumb_color);
     }
 
     /* Pop after scrollbar draw so the thumb stays bounded by the viewport */
@@ -576,10 +572,8 @@ bool iui_bottom_sheet_begin(iui_context *ctx,
         iui_rect_t scrim_rect = {0, 0, screen_width, screen_height};
         uint8_t scrim_alpha =
             (uint8_t) (IUI_SCRIM_ALPHA * state->anim_progress);
-        ctx->renderer.draw_box(
-            scrim_rect, 0.f,
-            (scrim_alpha << 24) | (ctx->colors.scrim & 0x00FFFFFF),
-            ctx->renderer.user);
+        iui_emit_box(ctx, scrim_rect, 0.f,
+                     (scrim_alpha << 24) | (ctx->colors.scrim & 0x00FFFFFF));
 
         /* Push modal layer */
         iui_push_layer(ctx, 100);
@@ -593,9 +587,8 @@ bool iui_bottom_sheet_begin(iui_context *ctx,
 
     /* Draw sheet background with rounded top corners */
     iui_rect_t sheet_rect = {0, sheet_y, screen_width, current_height + 100.f};
-    ctx->renderer.draw_box(sheet_rect, IUI_BOTTOM_SHEET_CORNER_RADIUS,
-                           ctx->colors.surface_container_low,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, sheet_rect, IUI_BOTTOM_SHEET_CORNER_RADIUS,
+                 ctx->colors.surface_container_low);
 
     /* Track component for MD3 validation (use logical height, not padded rect)
      */
@@ -609,9 +602,8 @@ bool iui_bottom_sheet_begin(iui_context *ctx,
     iui_rect_t handle_rect = {handle_x, handle_y,
                               IUI_BOTTOM_SHEET_DRAG_HANDLE_WIDTH,
                               IUI_BOTTOM_SHEET_DRAG_HANDLE_HEIGHT};
-    ctx->renderer.draw_box(handle_rect,
-                           IUI_BOTTOM_SHEET_DRAG_HANDLE_HEIGHT * 0.5f,
-                           ctx->colors.on_surface_variant, ctx->renderer.user);
+    iui_emit_box(ctx, handle_rect, IUI_BOTTOM_SHEET_DRAG_HANDLE_HEIGHT * 0.5f,
+                 ctx->colors.on_surface_variant);
 
     /* Handle drag interaction */
     iui_rect_t drag_area = {0, sheet_y, screen_width, 48.f};
@@ -719,8 +711,8 @@ void iui_tooltip(iui_context *ctx, const char *text)
 
     /* Draw tooltip background using inverse colors for contrast */
     iui_rect_t tooltip_rect = {x, y, width, height};
-    ctx->renderer.draw_box(tooltip_rect, IUI_TOOLTIP_CORNER_RADIUS,
-                           ctx->colors.inverse_surface, ctx->renderer.user);
+    iui_emit_box(ctx, tooltip_rect, IUI_TOOLTIP_CORNER_RADIUS,
+                 ctx->colors.inverse_surface);
 
     /* Track component for MD3 validation */
     IUI_MD3_TRACK_TOOLTIP(tooltip_rect, IUI_TOOLTIP_CORNER_RADIUS);
@@ -793,8 +785,8 @@ bool iui_tooltip_rich(iui_context *ctx,
 
     /* Draw background */
     iui_rect_t tooltip_rect = {x, y, width, height};
-    ctx->renderer.draw_box(tooltip_rect, IUI_TOOLTIP_CORNER_RADIUS,
-                           ctx->colors.inverse_surface, ctx->renderer.user);
+    iui_emit_box(ctx, tooltip_rect, IUI_TOOLTIP_CORNER_RADIUS,
+                 ctx->colors.inverse_surface);
 
     /* Draw content */
     float text_y = y + IUI_TOOLTIP_PADDING;
@@ -822,8 +814,7 @@ bool iui_tooltip_rich(iui_context *ctx,
         if (hovered) {
             uint32_t hover_color = iui_state_layer(ctx->colors.inverse_primary,
                                                    IUI_STATE_HOVER_ALPHA);
-            ctx->renderer.draw_box(action_rect, 4.f, hover_color,
-                                   ctx->renderer.user);
+            iui_emit_box(ctx, action_rect, 4.f, hover_color);
         }
 
         iui_internal_draw_text(ctx, x + IUI_TOOLTIP_PADDING + 4.f, text_y,
@@ -848,10 +839,10 @@ void iui_badge_dot(iui_context *ctx, float anchor_x, float anchor_y)
     float x = anchor_x - IUI_BADGE_OFFSET_X;
     float y = anchor_y + IUI_BADGE_OFFSET_Y;
 
-    ctx->renderer.draw_box(
-        (iui_rect_t) {x - radius, y - radius, IUI_BADGE_DOT_SIZE,
-                      IUI_BADGE_DOT_SIZE},
-        radius, ctx->colors.error, ctx->renderer.user);
+    iui_emit_box(ctx,
+                 (iui_rect_t) {x - radius, y - radius, IUI_BADGE_DOT_SIZE,
+                               IUI_BADGE_DOT_SIZE},
+                 radius, ctx->colors.error);
 }
 
 void iui_badge_number(iui_context *ctx,
@@ -886,8 +877,8 @@ void iui_badge_number(iui_context *ctx,
     float y = anchor_y + IUI_BADGE_OFFSET_Y - height * 0.5f;
 
     /* Draw badge background */
-    ctx->renderer.draw_box((iui_rect_t) {x, y, width, height}, radius,
-                           ctx->colors.error, ctx->renderer.user);
+    iui_emit_box(ctx, (iui_rect_t) {x, y, width, height}, radius,
+                 ctx->colors.error);
 
     /* Draw badge text centered */
     float text_x = x + (width - text_width) * 0.5f;
@@ -920,7 +911,7 @@ static bool draw_banner_action(iui_context *ctx,
     if (hovered) {
         uint32_t hover =
             iui_state_layer(ctx->colors.primary, IUI_STATE_HOVER_ALPHA);
-        ctx->renderer.draw_box(btn_rect, 4.f, hover, ctx->renderer.user);
+        iui_emit_box(ctx, btn_rect, 4.f, hover);
         if (ctx->mouse_released & IUI_MOUSE_LEFT)
             clicked = true;
     }
@@ -947,17 +938,16 @@ int iui_banner(iui_context *ctx, const iui_banner_options *options)
                               height};
 
     /* Draw banner background */
-    ctx->renderer.draw_box(banner_rect, 0.f, ctx->colors.surface_container,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, banner_rect, 0.f, ctx->colors.surface_container);
 
     /* Track component for MD3 validation */
     IUI_MD3_TRACK_BANNER(banner_rect, 0.f);
 
     /* Draw divider at bottom */
-    ctx->renderer.draw_box(
-        (iui_rect_t) {banner_rect.x, banner_rect.y + height - 1.f,
-                      banner_rect.width, 1.f},
-        0.f, ctx->colors.outline_variant, ctx->renderer.user);
+    iui_emit_box(ctx,
+                 (iui_rect_t) {banner_rect.x, banner_rect.y + height - 1.f,
+                               banner_rect.width, 1.f},
+                 0.f, ctx->colors.outline_variant);
 
     float content_x = banner_rect.x + IUI_BANNER_PADDING;
 
@@ -1093,8 +1083,7 @@ void iui_table_header(iui_context *ctx,
 
     /* Draw header cell background */
     iui_rect_t cell_rect = {state->current_x, state->row_y, width, height};
-    ctx->renderer.draw_box(cell_rect, 0.f, ctx->colors.surface_container,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, cell_rect, 0.f, ctx->colors.surface_container);
 
     /* Draw header text with label_large style (bold) */
     float text_x = state->current_x + IUI_TABLE_CELL_PADDING;
@@ -1109,11 +1098,11 @@ void iui_table_header(iui_context *ctx,
     if (state->current_col >= state->cols) {
         state->row_y += height;
         /* Draw divider below header */
-        ctx->renderer.draw_box(
-            (iui_rect_t) {state->start_x,
-                          state->row_y - IUI_TABLE_DIVIDER_HEIGHT,
-                          ctx->layout.width, IUI_TABLE_DIVIDER_HEIGHT},
-            0.f, ctx->colors.outline_variant, ctx->renderer.user);
+        iui_emit_box(ctx,
+                     (iui_rect_t) {state->start_x,
+                                   state->row_y - IUI_TABLE_DIVIDER_HEIGHT,
+                                   ctx->layout.width, IUI_TABLE_DIVIDER_HEIGHT},
+                     0.f, ctx->colors.outline_variant);
         state->in_header = false;
     }
 }
@@ -1157,9 +1146,7 @@ void iui_table_cell(iui_context *ctx,
     /* Alternate row background for zebra striping */
     if (state->row_index % 2 == 1) {
         iui_rect_t cell_rect = {state->current_x, state->row_y, width, height};
-        ctx->renderer.draw_box(cell_rect, 0.f,
-                               ctx->colors.surface_container_low,
-                               ctx->renderer.user);
+        iui_emit_box(ctx, cell_rect, 0.f, ctx->colors.surface_container_low);
     }
 
     /* Draw cell text */
@@ -1180,10 +1167,11 @@ void iui_table_row_end(iui_context *ctx, iui_table_state *state)
     state->row_y += IUI_TABLE_ROW_HEIGHT;
 
     /* Draw row divider */
-    ctx->renderer.draw_box(
+    iui_emit_box(
+        ctx,
         (iui_rect_t) {state->start_x, state->row_y - IUI_TABLE_DIVIDER_HEIGHT,
                       ctx->layout.width, IUI_TABLE_DIVIDER_HEIGHT},
-        0.f, ctx->colors.outline_variant, ctx->renderer.user);
+        0.f, ctx->colors.outline_variant);
 }
 
 void iui_table_end(iui_context *ctx, const iui_table_state *state)
@@ -1240,8 +1228,7 @@ bool iui_carousel_item(iui_context *ctx,
     uint32_t bg_color = ctx->colors.surface_container;
 
     /* Draw background */
-    ctx->renderer.draw_box(item_rect, IUI_CAROUSEL_CORNER_RADIUS, bg_color,
-                           ctx->renderer.user);
+    iui_emit_box(ctx, item_rect, IUI_CAROUSEL_CORNER_RADIUS, bg_color);
 
     /* State layer */
     iui_draw_state_layer(ctx, item_rect, IUI_CAROUSEL_CORNER_RADIUS,
