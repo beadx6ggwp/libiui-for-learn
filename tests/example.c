@@ -31,6 +31,14 @@
 #include "../src/internal.h"
 #include "../src/iui_config.h"
 
+#ifdef _WIN32
+#include <time.h>
+static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
+    // Windows 的參數順序與 POSIX 相反
+    return localtime_s(result, timep) == 0 ? result : NULL;
+}
+#endif
+
 /* Platform-specific includes */
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -320,7 +328,10 @@ static void draw_clock_window(iui_context *ui, iui_port_ctx *port)
     struct timeval tv;
     gettimeofday(&tv, NULL);
     struct tm now_tm;
-    localtime_r(&tv.tv_sec, &now_tm);
+    // 原本: localtime_r(&tv.tv_sec, &now_tm);
+    // 修改為使用臨時變數轉換型別，並避開與後方 float seconds 變數撞名
+    time_t temp_sec = (time_t)tv.tv_sec; 
+    localtime_r(&temp_sec, &now_tm);
 
     float size = fminf(rect.width, rect.height), radius = size * 0.45f,
           cx = rect.x + rect.width * 0.5f, cy = rect.y + rect.height * 0.5f;

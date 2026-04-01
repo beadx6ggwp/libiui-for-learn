@@ -1,3 +1,122 @@
+# libiui Windows (MSYS2 UCRT64) 編譯與環境配置教學
+
+這份指南紀錄了如何在 Windows 環境下，使用 MSYS2 UCRT64 工具鏈編譯並執行由 JSERV 開發的 [libiui](https://github.com/sysprog21/libiui) 專案。
+
+## 1. 前置準備與工具安裝
+
+首先，確保你的 **MSYS2** 已經更新，並安裝了必要的編譯器與開發庫（如 SDL2，用於範例程式的渲染後端）。
+
+2025 環境配置
+https://hackmd.io/@beadx6ggwp/B1pTXpKQZg
+
+在 **MSYS2 UCRT64** 終端機執行：
+
+```bash
+# 更新系統套件
+pacman -Syu
+
+# 安裝必要套件 (GCC, Make, SDL2, Python3)
+# 加入了 git 以確保 Makefile 能自動抓取 Kconfiglib 等依賴工具
+pacman -S --needed --confirm \
+    mingw-w64-ucrt-x86_64-gcc \
+    mingw-w64-ucrt-x86_64-make \
+    mingw-w64-ucrt-x86_64-SDL2 \
+    python3 \
+    git
+```
+
+> **個人化建議：** 為了符合開發習慣，建議將 `C:\msys64\ucrt64\bin\mingw32-make.exe` 重新命名為 `make.exe`，以便直接使用 `make` 指令。
+
+---
+
+## 2. 解決 Windows 環境相容性問題
+
+由於 `libiui` 原生針對 POSIX (Linux) 環境開發，在 Windows UCRT 下編譯 `tests/example.c` 會遇到 `localtime_r` 函數缺失以及 `time_t` 型別不匹配的問題。
+
+### 修正 `tests/example.c`
+
+請依照以下步驟修改 `tests/example.c`：
+
+#### A. 加入 POSIX 相容性定義
+在檔案上方的 `#include` 區塊後方加入以下程式碼，用來將 Windows 的 `localtime_s` 包裝成 `localtime_r`：
+
+```c
+#ifdef _WIN32
+#include <time.h>
+static inline struct tm *localtime_r(const time_t *timep, struct tm *result) {
+    // Windows 的參數順序與 POSIX 相反
+    return localtime_s(result, timep) == 0 ? result : NULL;
+}
+#endif
+```
+
+#### B. 修正時鐘渲染函數 (`draw_clock_window`)
+找到約第 320 行起的 `draw_clock_window` 函數，將涉及時間轉換的部分修改如下，以解決 `long` (32-bit) 與 `time_t` (64-bit) 指標不相容的問題：
+
+```c
+// 原本: localtime_r(&tv.tv_sec, &now_tm);
+// 修改為使用臨時變數轉換型別，並避開與後方 float seconds 變數撞名
+time_t temp_sec = (time_t)tv.tv_sec; 
+localtime_r(&temp_sec, &now_tm);
+```
+
+
+
+---
+
+## 3. 編譯流程
+
+使用MSYS2 UCRT64 終端機 在 `libiui` 專案根目錄下執行以下指令：
+
+1. **生成配置檔**：
+   ```bash
+   make defconfig
+   ```
+   這會根據 Kconfig 預設值生成 `.config` 文件，預設會開啟 SDL2 backend。
+
+2. **編譯**：
+   ```bash
+   make 
+   ```
+   若使用 `-j$(nproc)` 可呼叫所有 CPU 核心加速編譯過程。
+   ```bash
+   make -j$(nproc)
+   ```
+
+---
+
+## 4. 執行與測試
+
+編譯成功後，目錄下會生成 `libiui_example.exe`。
+
+```bash
+./libiui_example.exe
+```
+
+若看到帶有 Material Design 3 風格、時鐘以及 Nyan Cat 動畫的視窗，即代表環境配置成功。
+
+---
+
+## 5. 技術重點回顧 (For Developers)
+
+| 問題點 | 原因 | 解決方案 |
+| :--- | :--- | :--- |
+| **函數缺失** | `localtime_r` 是 POSIX 標準，Windows UCRT 僅提供 `localtime_s`。 | 使用 `#ifdef _WIN32` 包裝 `localtime_s`。 |
+| **指標型別不匹配** | Windows 的 `tv_sec` 常為 `long`，但 `time_t` 為 `long long`。 | 進行顯式的型別轉型 (`time_t`)。 |
+| **變數命名衝突** | C 語言在同一 Scope 內不允許同名但不同型別的變數。 | 將暫存時間變數重新命名（如 `temp_sec`）。 |
+
+---
+
+## 6. 後續開發：對接 Pixel-Renderer
+
+成功編譯後，若要將 `libiui` 整合進自定義的渲染器，應關注以下結構：
+- **`src/draw.c`**: 負責維護 `iui_draw_list`（繪圖指令清單）。
+- **`ports/sdl2.c`**: 參考如何遍歷繪圖指令並將其轉換為像素填充動作。
+- **`include/iui/draw.h`**: 定義了所有可用的繪圖指令類型（Rect, Line, Text 等）。
+
+---
+
+
 # libiui
 
 A complete [Material Design 3](https://m3.material.io/) (MD3) implementation in pure C.
