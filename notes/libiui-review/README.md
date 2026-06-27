@@ -158,7 +158,10 @@ Build:
    GCC preprocessing, compilation, assembling, linking, object files, static libraries, dependency files.
 
 2.1. libiui build flow
-   Makefile, mk/, configs/, Kconfig, generated files.
+   Kconfig, .config, src/iui_config.h, Makefile source selection, compile/archive/link build graph.
+
+2.2. libiui build variants and validation
+   generated files, demo target, make check, CI matrix, WASM flow, build failure diagnosis.
 
 3.0. Software testing foundations
    unit/integration/E2E, arrange-act-assert, test doubles, control, observability.
@@ -249,13 +252,16 @@ notes/libiui-review/ch01-source-map.md
   include/, src/, ports/, tests/ 的責任分工.
 
 notes/libiui-review/ch02-build-flow.md
-  Build flow 入口, 說明 ch02-00 and ch02-01 的閱讀順序.
+  Build flow 入口, 說明 ch02-00, ch02-01, and ch02-02 的閱讀順序.
 
 notes/libiui-review/ch02-00-c-build-system-foundations.md
   GCC/C build 基礎, preprocessing, compilation, object files, linking, static libraries, dependency files.
 
 notes/libiui-review/ch02-01-libiui-build-flow.md
-  make defconfig, .config, src/iui_config.h, generated files, build targets.
+  Kconfig decision, .config, src/iui_config.h, Makefile source selection, compile/archive/link build graph.
+
+notes/libiui-review/ch02-02-libiui-build-variants-and-validation.md
+  generated files, demo target, make check, CI matrix, WASM flow, and build failure diagnosis.
 
 notes/libiui-review/ch03-00-software-testing-foundations.md
   開發端測試基礎, unit/integration/E2E, test double, control and observability.

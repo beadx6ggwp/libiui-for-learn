@@ -1104,7 +1104,7 @@ build flow asks:
   這一次 config 要選哪些 pieces 編進去?
 ```
 
-`ch02` 內部建議先讀 [ch02-00-c-build-system-foundations.md](ch02-00-c-build-system-foundations.md), 再讀 [ch02-01-libiui-build-flow.md](ch02-01-libiui-build-flow.md). 讀完後, 再進入 [ch03-00-software-testing-foundations.md](ch03-00-software-testing-foundations.md), 先補開發端測試基礎. 接著讀 [ch03-01-gui-test-and-validation-model.md](ch03-01-gui-test-and-validation-model.md), 理解 GUI 測試如何控制 frame, input, mock renderer, and headless backend. 之後讀 [ch04-runtime-model.md](ch04-runtime-model.md), 追一個 widget 從 input 到 draw 的完整路線. 最後讀 [ch05-public-api-tour.md](ch05-public-api-tour.md), 把 implementation path 反過來整理成使用者視角的 public API contract.
+`ch02` 內部建議先讀 [ch02-00-c-build-system-foundations.md](ch02-00-c-build-system-foundations.md), 再讀 [ch02-01-libiui-build-flow.md](ch02-01-libiui-build-flow.md), 接著讀 [ch02-02-libiui-build-variants-and-validation.md](ch02-02-libiui-build-variants-and-validation.md). 讀完後, 再進入 [ch03-00-software-testing-foundations.md](ch03-00-software-testing-foundations.md), 先補開發端測試基礎. 接著讀 [ch03-01-gui-test-and-validation-model.md](ch03-01-gui-test-and-validation-model.md), 理解 GUI 測試如何控制 frame, input, mock renderer, and headless backend. 之後讀 [ch04-runtime-model.md](ch04-runtime-model.md), 追一個 widget 從 input 到 draw 的完整路線. 最後讀 [ch05-public-api-tour.md](ch05-public-api-tour.md), 把 implementation path 反過來整理成使用者視角的 public API contract.
 
 ## Source Files Read
 

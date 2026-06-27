@@ -592,5 +592,7 @@ C build primitives
   -> Makefile target graph
   -> Kconfig source selection
   -> generated config header
-  -> backend and test build variants
+  -> backend source selection
 ```
+
+再接著讀 [ch02-02-libiui-build-variants-and-validation.md](ch02-02-libiui-build-variants-and-validation.md), 看 generated files, demo target, `make check`, CI matrix, WASM flow, and build failure diagnosis.
