@@ -23,6 +23,22 @@ fix typo / address comment 也沒關係
 > [Scope]
 > 本章只講 commit subject, commit body, commit scope, history cleanup. PR body 放到 Ch03.
 
+## Upstream 明文規則
+
+`CONTRIBUTING.md` 是 commit style 的 primary source. 它引用 "How to Write a Git Commit Message", 並要求:
+
+```text
+subject 和 body 用空白行分開
+subject 約 50 字
+subject 首字母大寫
+subject 不用句點結尾
+使用 imperative mood
+body wrap around 72 columns
+body 解釋 what and why, not how
+```
+
+所以這裡不是在套 Conventional Commits. 我們後面觀察 upstream history, 是為了找出這個 repo 實際常用的 subject 形狀, 不是取代 `CONTRIBUTING.md`.
+
 ## 先觀察 upstream subject
 
 `sysprog21/libiui` 最近 history 有這些 subject:
@@ -281,3 +297,9 @@ Document Windows build requirements
 下一章看 PR body 和 review 回應. Commit 說的是 history, PR body 說的是 reviewer 當下需要的 context.
 
 讀: [ch03-pr-body-and-review.md](ch03-pr-body-and-review.md)
+
+## Source Notes
+
+```text
+../../CONTRIBUTING.md
+```

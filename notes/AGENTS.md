@@ -64,3 +64,7 @@ When comparing approaches, state the constraint first, then explain why a naive 
 For topic-folder articles, write primarily in Traditional Chinese as complete teaching articles, not short summaries. Use a learning-note style: problem-driven opening, scope box, naive idea, why it fails, correct model, concrete examples, ASCII diagrams, commands, a three-point summary, and source-note links.
 
 For Git operation teaching, include ASCII diagrams for branch pointers, working tree, index, local branches, remote-tracking branches, and remote branches. The diagram should make clear which pointer moves, which files are only in `WT`, which files are staged in `Index`, and whether the command affects `origin`, `upstream`, or only local state.
+
+When proposing next steps, avoid presenting a single path as if it is the only option. Provide 2-4 viable choices, explain when each is appropriate, note the tradeoffs, and then identify the recommended default path with the reason.
+
+For commits, suggest the staging scope and commit message, but let the user run `git add`, `git commit`, and `git push` unless they explicitly ask Codex to perform those commands.

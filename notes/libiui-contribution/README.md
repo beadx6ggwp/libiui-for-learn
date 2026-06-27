@@ -15,7 +15,7 @@ libiui-contribution
 ```
 
 > [Scope]
-> 這裡不是一般 open-source 禮儀筆記. 目標是根據 `sysprog21/libiui` 的 commit history, PR 討論, CI 設定, 以及 jserv/sysprog21 的協作風格, 整理出對這個 repo 可用的貢獻寫作方式.
+> 這裡不是一般 open-source 禮儀筆記. 目標是先以 upstream `CONTRIBUTING.md` 作為明文規範, 再根據 `sysprog21/libiui` 的 commit history, PR 討論, CI 設定, 以及 jserv/sysprog21 的協作風格, 整理出對這個 repo 可用的貢獻寫作方式.
 
 ## 建議閱讀順序
 
@@ -33,7 +33,10 @@ ch04-docs-tests-evidence.md
   再看文件, screenshots, test commands, benchmark, CI evidence 要怎麼放.
 
 ch05-pr-operation-playbook.md
-  最後把前面 PR 寫作要求接到實際 Git 操作: fetch upstream, 開 fix/* branch, 抽 patch, 檢查 diff, push, review update.
+  再把前面 PR 寫作要求接到實際 Git 操作: fetch upstream, 開 fix/* branch, 抽 patch, 檢查 diff, push, review update.
+
+ch06-upstream-contributing-guide.md
+  最後回頭對照 upstream CONTRIBUTING.md, 區分明文規範和我們從 history/PR 推出的工作流.
 ```
 
 ## 這組文章的核心模型
@@ -58,6 +61,7 @@ problem -> root cause -> minimal change -> validation -> maintainability
 這組文章主要整理自:
 
 ```text
+../../CONTRIBUTING.md
 ../0626_1726_jserv-pr-guidelines.md
 ../0627_0051_libiui-development-model.md
 ../0626_1723_upstream-pr-submission-plan.md

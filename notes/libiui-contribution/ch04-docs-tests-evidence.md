@@ -17,6 +17,25 @@ naive 想法是:
 > [Scope]
 > 本章整理 `libiui` PR 裡 tests, screenshots, benchmarks, docs 的放法. 它也說明為什麼你的 learning notes 不該直接放進 upstream PR.
 
+## Upstream 明文要求
+
+`CONTRIBUTING.md` 補上三個明確要求:
+
+```text
+formatters:
+  clang-format 20+
+  shfmt
+  black 25.1.0
+
+before commit:
+  test your code before committing
+
+documentation language:
+  use American English, en_US
+```
+
+所以本章談 evidence 時, 不只是 "我有跑過 build". 如果你改 C, shell, or Python, 還要對應 formatter. 如果你改 upstream docs or comments, 語氣和拼字也要符合 English user-facing docs, 不是個人 notes 風格.
+
 ## CI 告訴你 maintainer 在意什麼
 
 `.github/workflows/main.yml` 對 code-related changes 會跑:
@@ -280,15 +299,16 @@ Limitations:
 
 ```text
 notes/windows-build/
-  專門整理 MSYS2 UCRT64 build, localtime_r/localtime_s, SDL2 package, exact validation.
+  先整理 Windows build investigation, 不預設只有 MSYS2 UCRT64 or localtime_r/localtime_s.
 
 notes/libiui-windows-pr/
-  專門為第一個 Windows support PR 寫 problem, root cause, patch plan, validation.
+  等 Windows build 問題範圍清楚後, 再為第一個 Windows-related PR 寫 problem, root cause, patch plan, validation.
 ```
 
 ## Source Notes
 
 ```text
+../../CONTRIBUTING.md
 ../0626_1726_jserv-pr-guidelines.md
 ../0627_0051_libiui-development-model.md
 ../0626_1723_upstream-pr-submission-plan.md

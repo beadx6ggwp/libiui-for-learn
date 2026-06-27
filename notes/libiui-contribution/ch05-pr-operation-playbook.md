@@ -762,6 +762,31 @@ commit 找不到或 reset 後害怕弄丟
   讀 ../libiui-git/ch06-rebase-conflict-and-recovery.md
 ```
 
+## Upstream 規範對照
+
+如果你不確定某一步是不是只是我們自己的 workflow, 回到:
+
+```text
+CONTRIBUTING.md
+  upstream 明文規範
+
+ch06-upstream-contributing-guide.md
+  本資料夾對 CONTRIBUTING.md 的整理
+```
+
+特別是這些規則不是臆測:
+
+```text
+coherent commits
+avoid WIP commits
+test before committing
+format C, shell, Python files
+use imperative commit subject
+use body to explain what and why
+```
+
+而 `learn/*` 和 `fix/*` 的分工, 則是為了讓上述 upstream 規則在這個 fork 裡容易做到.
+
 ## 本章學到的三件事
 
 > [Summary]
@@ -778,6 +803,7 @@ commit 找不到或 reset 後害怕弄丟
 ../libiui-git/ch04-libiui-repo-policy.md
 ../libiui-git/ch05-diff-range-and-merge-base.md
 ../libiui-git/ch06-rebase-conflict-and-recovery.md
+ch06-upstream-contributing-guide.md
 ../0626_1723_upstream-pr-submission-plan.md
 ../0626_1731_repo-state-cleanup-strategy.md
 ```

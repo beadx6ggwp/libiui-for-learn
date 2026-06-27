@@ -18,6 +18,20 @@ PR body 簡單寫 update
 > [Scope]
 > 本章建立 `libiui` PR 的基本思考模型. Commit message, PR body, docs, tests 會在後面三章細講.
 
+## Upstream 明文地基
+
+`CONTRIBUTING.md` 是這組文章的 primary source. 它明確要求:
+
+```text
+substantial work should be discussed first
+commits should group coherent changes
+work-in-progress commits should be avoided
+code should be tested before committing
+style should follow project formatters
+```
+
+本章的 PR thinking model 是把這些明文規則轉成 review 時可檢查的工程因果鏈, 不是單純從 commit history 臆測.
+
 ## Maintainer 真正在 review 什麼
 
 一個好的 PR 要能回答這條因果鏈:

@@ -18,6 +18,22 @@ review comment 照改就好
 > [Scope]
 > 本章講 PR body, review 回應, draft PR, branch hygiene. 測試證據和文件風格會在 Ch04 細講.
 
+## Upstream 對 Discussion 的要求
+
+`CONTRIBUTING.md` 明確建議 bug report, feature request, substantial PR 先透過 GitHub Issue 討論. 這不是形式主義, 而是避免大改做完才發現方向不符合 project design.
+
+因此:
+
+```text
+minor typo, small refactor, small docs/comment update
+  通常可以直接 PR
+
+new feature, larger refactor, architecture decision, uncertain behavior
+  先 issue or draft PR 比較合理
+```
+
+這個規則是 Ch03 後面 draft PR 和 review 回應方式的上游來源.
+
 ## PR Body 的任務
 
 PR body 要讓 reviewer 快速回答:
