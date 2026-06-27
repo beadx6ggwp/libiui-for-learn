@@ -447,6 +447,12 @@ git push --force
 > 2. Conflict 時先看 `git status` 和 `git diff`, 解完後 `git add` 再 `git rebase --continue`, 不對就 `git rebase --abort`.
 > 3. Partial staging 和 reflog 是兩個安全工具: 前者讓 commit scope 乾淨, 後者讓錯誤 history 操作還有救回機會.
 
+## 下一章
+
+下一章把 `learn/repo-review` 當成 long-lived learning branch 來看, 整理它什麼時候要同步 upstream, 以及 feature branch 旁邊的開發 notes 應該怎麼保存.
+
+讀: [ch07-learning-branch-workflow.md](ch07-learning-branch-workflow.md)
+
 ## Source Notes
 
 ```text

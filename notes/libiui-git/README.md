@@ -47,7 +47,10 @@ ch05-diff-range-and-merge-base.md
   再理解 `A..B`, `A...B`, `merge-base`, GitHub PR diff, 以及 upstream/main 前進後要不要 rebase.
 
 ch06-rebase-conflict-and-recovery.md
-  最後處理 rebase conflict, partial staging, tracking branch, stash, reflog recovery.
+  接著處理 rebase conflict, partial staging, tracking branch, stash, reflog recovery.
+
+ch07-learning-branch-workflow.md
+  最後整理 `learn/repo-review` 的操作 flow, 包含何時同步 upstream, feature branch 旁邊的 notes 怎麼保存, 以及 PR branch 如何避免混入 notes.
 ```
 
 ## 和時間軸筆記的關係
