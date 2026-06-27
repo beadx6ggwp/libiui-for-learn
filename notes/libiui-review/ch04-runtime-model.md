@@ -1012,17 +1012,11 @@ behavior output:
 
 ## 下一章
 
-接下來有兩條合理路線:
+接下來先讀 [ch05-public-api-tour.md](ch05-public-api-tour.md).
 
-```text
-ch05-public-api-tour.md
-  從 include/iui.h 分類整理 public API: context, frame, input, layout, widgets, renderer, MD3 spec.
+ch04 是從 implementation side 追 `iui_button()` 的 runtime path. ch05 反過來從使用者視角整理 `include/iui.h` and `include/iui-spec.h`, 看 public API 如何描述 context, renderer callbacks, input, frame lifecycle, layout, widgets, overlays, focus, theme, and performance surface.
 
-ch05-backend-boundary.md
-  從 renderer callbacks 追到 ports/headless.c, ports/sdl2.c, ports/wasm.c, 看 backend 如何把 draw commands 變成 pixels/events.
-```
-
-我會建議先寫 public API tour. 因為 ch04 已經建立 runtime path, 回頭整理 `include/iui.h` 會比較不容易變成 API list.
+讀完 ch05 後, 再進入 minimal app lab 會比較合理. 因為那時已經知道哪些 API 是 app 必須呼叫的 contract, 哪些 API 是 backend 必須提供的 boundary.
 
 ## Source Files Read
 

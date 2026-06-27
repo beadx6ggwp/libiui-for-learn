@@ -999,7 +999,7 @@ test evidence
   tests/test-*.c
 ```
 
-之後再開 `ch05-public-api-tour.md`, 從 `include/iui.h` 的 API group 開始讀. 目前 runtime model 已經接上測試篇建立的觀察方法.
+之後再讀 [ch05-public-api-tour.md](ch05-public-api-tour.md), 從 `include/iui.h` and `include/iui-spec.h` 的 API group 開始讀. 目前 runtime model 已經接上測試篇建立的觀察方法, ch05 則把這些觀察點整理成使用者視角的 public contract.
 
 ## Source Files Read
 

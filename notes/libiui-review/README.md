@@ -172,13 +172,19 @@ Build:
 5. Public API
    include/iui.h, include/iui-spec.h.
 
-6. Core modules
+6. Minimal app lab
+   用最小 renderer callbacks, context buffer, frame loop 建立可實驗的 UI program.
+
+7. Headless test lab
+   用 headless backend 和 input injection 驗證 widget behavior and draw output.
+
+8. Core modules
    src/input.c, src/layout.c, src/basic.c, src/menu.c, src/fab.c.
 
-7. Render and backend boundary
+9. Render and backend boundary
    ports/sdl2.c, ports/headless.c, ports/wasm.c, assets/web/.
 
-8. Existing contribution style
+10. Existing contribution style
    commit history, PR discussion, CI workflow.
 ```
 
@@ -259,6 +265,12 @@ notes/libiui-review/ch04-runtime-model.md
 
 notes/libiui-review/ch05-public-api-tour.md
   include/iui.h and include/iui-spec.h 的 public API 分類與使用者視角.
+
+notes/libiui-review/ch06-minimal-app-lab.md
+  用最小 renderer callbacks, context buffer, frame lifecycle, and widgets 建立實驗場.
+
+notes/libiui-review/ch07-headless-test-lab.md
+  用 headless backend, input injection, and observable output 練習驗證 UI behavior.
 
 notes/windows-build/README.md
   Windows build 調查入口, 先列環境, 失敗案例, 待確認問題, validation plan.
