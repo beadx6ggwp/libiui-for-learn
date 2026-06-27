@@ -824,20 +824,22 @@ bug in build/test route?
   maybe Makefile, mk/, configs/, scripts/
 ```
 
-## 下一步: Minimal App Lab
+## 下一步: Experiment Setup
 
-下一章適合寫 `ch06-minimal-app-lab.md`. 目標不是做正式 PR, 而是建立一個可反覆實驗的最小路線:
+下一章先讀 [ch06-00-experiment-setup.md](ch06-00-experiment-setup.md). 目標不是做正式 PR, 而是先把可反覆實驗的工作場整理出來:
 
 ```text
-create renderer callbacks
-allocate context buffer
-initialize iui_context
-inject a few input events
-run begin_frame / begin_window / widget calls / end_frame
-observe draw callbacks or framebuffer
+git strategy
+  learn/*, exp/*, fix/* 不要混.
+
+build flow
+  .config, src/iui_config.h, Makefile, Kconfig 要先對上.
+
+environment
+  Windows/MSYS2/PowerShell 的 shell boundary 要先確認.
 ```
 
-這會把本章的 public API contract 變成可操作的實驗場.
+整理完後, 再進 [ch06-01-minimal-app-lab.md](ch06-01-minimal-app-lab.md), 把本章的 public API contract 變成可觀察的 program.
 
 ## 本章學到的三件事
 

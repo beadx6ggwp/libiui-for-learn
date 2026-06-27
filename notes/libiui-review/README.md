@@ -172,7 +172,10 @@ Build:
 5. Public API
    include/iui.h, include/iui-spec.h.
 
-6. Minimal app lab
+6.0. Experiment setup
+   先整理 git branch strategy, build/config boundary, Windows/MSYS2 environment.
+
+6.1. Minimal app lab
    用最小 renderer callbacks, context buffer, frame loop 建立可實驗的 UI program.
 
 7. Headless test lab
@@ -266,7 +269,10 @@ notes/libiui-review/ch04-runtime-model.md
 notes/libiui-review/ch05-public-api-tour.md
   include/iui.h and include/iui-spec.h 的 public API 分類與使用者視角.
 
-notes/libiui-review/ch06-minimal-app-lab.md
+notes/libiui-review/ch06-00-experiment-setup.md
+  開始實驗前先整理 git strategy, build flow, environment probes, and Windows shell boundary.
+
+notes/libiui-review/ch06-01-minimal-app-lab.md
   用最小 renderer callbacks, context buffer, frame lifecycle, and widgets 建立實驗場.
 
 notes/libiui-review/ch07-headless-test-lab.md
