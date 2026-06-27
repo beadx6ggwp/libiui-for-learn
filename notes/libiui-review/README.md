@@ -114,9 +114,9 @@ git switch -c fix/msys2-ucrt-clock upstream/main
 要 review 整份 repo, 不是從檔案列表開始背. 要從幾個系統問題切入:
 
 ```text
-Build:
-  make defconfig 到 make 之間產生了什麼?
-  Kconfig 和 .config 如何決定 backend, demo, test?
+Project orientation:
+  libiui 是什麼?
+  immediate-mode UI 在這個 repo 裡怎麼被拆成 input, layout, draw, backend?
 
 Public API:
   include/iui.h 暴露哪些概念?
@@ -137,29 +137,48 @@ Tests and demos:
 Contribution surface:
   哪些改動是小而可 review 的 patch?
   哪些其實需要先討論 design?
+
+Build:
+  make defconfig 到 make 之間產生了什麼?
+  Kconfig 和 .config 如何決定 backend, demo, test?
 ```
 
 ## 建議 Review 順序
 
-第一輪只建立地圖, 不追細節:
+第一輪只建立地圖, 不追細節. 章節順序應該先從 project orientation 開始, 不要一開始就進 build system:
 
 ```text
-1. Build flow
+0. What is libiui
+   專案定位, immediate-mode UI, frame flow, source tree 大方向.
+
+1. Source map
+   include/, src/, ports/, tests/ 的責任分工.
+
+2.0. C build system foundations
+   GCC preprocessing, compilation, assembling, linking, object files, static libraries, dependency files.
+
+2.1. libiui build flow
    Makefile, mk/, configs/, Kconfig, generated files.
 
-2. Public API
+3.0. Software testing foundations
+   unit/integration/E2E, arrange-act-assert, test doubles, control, observability.
+
+3.1. GUI test and validation model
+   tests/common.*, tests/main.c, test-*.c, ports/headless.c, scripts/headless-test.py.
+
+4. Runtime model
+   用 `iui_button()` 做 vertical slice, 追 input, frame, layout, widget state, draw callbacks, tests.
+
+5. Public API
    include/iui.h, include/iui-spec.h.
 
-3. Core modules
+6. Core modules
    src/input.c, src/layout.c, src/basic.c, src/menu.c, src/fab.c.
 
-4. Render and backend boundary
+7. Render and backend boundary
    ports/sdl2.c, ports/headless.c, ports/wasm.c, assets/web/.
 
-5. Tests and demos
-   tests/test-*.c, tests/example.c, Python headless harness.
-
-6. Existing contribution style
+8. Existing contribution style
    commit history, PR discussion, CI workflow.
 ```
 
@@ -214,17 +233,32 @@ repo review
 可以先產出這幾篇:
 
 ```text
-notes/libiui-review/ch01-build-flow.md
-  make defconfig, .config, src/iui_config.h, generated files, build targets.
+notes/libiui-review/ch00-what-is-libiui.md
+  libiui 是什麼, immediate-mode UI mental model, repo 大方向.
 
-notes/libiui-review/ch02-source-map.md
+notes/libiui-review/ch01-source-map.md
   include/, src/, ports/, tests/ 的責任分工.
 
-notes/libiui-review/ch03-runtime-model.md
+notes/libiui-review/ch02-build-flow.md
+  Build flow 入口, 說明 ch02-00 and ch02-01 的閱讀順序.
+
+notes/libiui-review/ch02-00-c-build-system-foundations.md
+  GCC/C build 基礎, preprocessing, compilation, object files, linking, static libraries, dependency files.
+
+notes/libiui-review/ch02-01-libiui-build-flow.md
+  make defconfig, .config, src/iui_config.h, generated files, build targets.
+
+notes/libiui-review/ch03-00-software-testing-foundations.md
+  開發端測試基礎, unit/integration/E2E, test double, control and observability.
+
+notes/libiui-review/ch03-01-gui-test-and-validation-model.md
+  GUI 測試模型, C unit tests, mock renderer, headless backend, screenshots, validation evidence.
+
+notes/libiui-review/ch04-runtime-model.md
   immediate-mode UI 的 input, layout, draw, widget state flow.
 
-notes/libiui-review/ch04-test-and-demo-model.md
-  unit tests, headless tests, demos, screenshots, validation evidence.
+notes/libiui-review/ch05-public-api-tour.md
+  include/iui.h and include/iui-spec.h 的 public API 分類與使用者視角.
 
 notes/windows-build/README.md
   Windows build 調查入口, 先列環境, 失敗案例, 待確認問題, validation plan.

@@ -38,6 +38,7 @@ Rules:
 - Avoid spaces, punctuation-heavy names, and vague titles such as `note.md` or `idea.md`.
 - If two notes are created in the same minute, add a numeric suffix: `0626_2130_draw-list-clipping-2.md`.
 - Topic-folder articles may use chapter-style or topic-based filenames without timestamps, for example `notes/libiui-git/ch01-fork-origin-upstream.md`, `notes/libiui-contribution/ch02-commit-style.md`, or `notes/windows-build/README.md`.
+- For a cluster of closely related articles under one main chapter, keep the main chapter stable and use subchapter filenames such as `ch03-00-software-testing-foundations.md`, `ch03-01-gui-test-and-validation-model.md`, and `ch03-02-headless-backend-testing.md`. Do not renumber later main chapters just because a prerequisite note is inserted into an existing topic.
 
 ## Note Structure
 
